@@ -114,6 +114,7 @@ const Footer = () => {
               <div className="flex items-start space-x-3">
                 <MapPin className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
                 <span className="text-sm opacity-90">
+                  Rua Paraná, 56, sala 4 - Centro de Miranda - MS<br />
                   Rodovia BR-163, 56, sala 02 - Campo Grande - MS
                 </span>
               </div>
