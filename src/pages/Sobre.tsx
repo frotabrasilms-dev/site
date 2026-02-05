@@ -13,7 +13,8 @@ import {
   MapPin,
   TrendingUp,
   CheckCircle,
-  Quote
+  Quote,
+  Handshake
 } from 'lucide-react';
 
 const Sobre = () => {
