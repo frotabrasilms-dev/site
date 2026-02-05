@@ -1,146 +1,79 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Settings, Upload, Loader2 } from 'lucide-react';
+import { Users, Settings, UserCheck, FileText, Edit, ShieldCheck, Loader2, ArrowLeft, Lock, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { adicionarParceiro, getParceiros } from '@/data/parceiros';
-import { Parceiro } from '@/types/parceiro';
+
+type ViewMode = 'landing' | 'login_admin' | 'verify_supervisor' | 'dashboard';
 
 const Admin = () => {
   const { toast } = useToast();
-  const [parceirosList, setParceirosList] = useState<Parceiro[]>([]);
-  const [isLoadingList, setIsLoadingList] = useState(true);
-  const [formData, setFormData] = useState({
-    nome: '',
-    imagem: '',
-    endereco: '',
-    site: ''
-  });
+  const navigate = useNavigate();
+
+  // State to manage the current view
+  const [viewMode, setViewMode] = useState<ViewMode>('landing');
+
+  // Login State
   const [password, setPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const fetchParceiros = async () => {
-    setIsLoadingList(true);
-    const data = await getParceiros();
-    setParceirosList(data);
-    setIsLoadingList(false);
-  };
+  // Security Modal State (Now inline)
+  const [verifyCpf, setVerifyCpf] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchParceiros();
-    }
-  }, [isAuthenticated]);
+  // ------------------------------------------------------------------
+  // Handlers
+  // ------------------------------------------------------------------
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setFormData(prev => ({ ...prev, imagem: '' })); // Limpa a URL se um arquivo for selecionado
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadImage = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `parceiros/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('images')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      console.error('Erro no upload:', uploadError);
-      throw uploadError;
-    }
-
-    const { data: { publicUrl } } = await supabase.storage // Added await here
-      .from('images')
-      .getPublicUrl(filePath);
-
-    return publicUrl;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    if (!formData.nome) {
-      toast({
-        title: "Erro",
-        description: "O campo 'Nome do Parceiro' é obrigatório.",
-        variant: "destructive"
-      });
-      setIsSubmitting(false);
+  const handleVerifyAccess = async () => {
+    if (verifyCpf.length < 14) {
+      toast({ title: "CPF inválido", variant: "destructive" });
       return;
     }
 
-    if (!selectedFile && !formData.imagem.trim()) { // Use .trim() to check for empty string
-      toast({
-        title: "Erro",
-        description: "Por favor, selecione uma imagem ou forneça uma URL.",
-        variant: "destructive"
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
+    setIsVerifying(true);
     try {
-      let imageUrl = formData.imagem;
-      if (selectedFile) {
-        imageUrl = await uploadImage(selectedFile); // This is already awaited
+      const cleanCpf = verifyCpf.replace(/\D/g, '');
+      const { data, error } = await supabase
+        .from('associados')
+        .select('nome, nomeado')
+        .eq('cpf', cleanCpf)
+        .single();
+
+      if (error || !data) {
+        throw new Error("Não encontrado");
       }
 
-      await adicionarParceiro({
-        nome: formData.nome,
-        imagem: imageUrl,
-        endereco: formData.endereco || null,
-        site: formData.site || null
-      });
+      if (data.nomeado === true) {
+        toast({ title: "Acesso Permitido", description: `Bem-vindo, ${data.nome}` });
+        navigate('/admin/nomear-supervisor');
+      } else {
+        toast({
+          title: "Acesso Negado",
+          description: "Acesso somente para nomeados.",
+          variant: "destructive"
+        });
+      }
 
-      toast({
-        title: "Sucesso!",
-        description: "Parceiro adicionado com sucesso."
-      });
-
-      // Limpar formulário
-      setFormData({ nome: '', imagem: '', endereco: '', site: '' });
-      setSelectedFile(null);
-      setImagePreview(null);
-      await fetchParceiros();
     } catch (error) {
-      console.error("Erro ao adicionar parceiro:", error);
       toast({
-        title: "Erro",
-        description: "Erro ao adicionar parceiro. Verifique o console para mais detalhes.",
+        title: "Acesso Negado",
+        description: "CPF não encontrado ou erro de verificação.",
         variant: "destructive"
       });
     } finally {
-      setIsSubmitting(false);
+      setIsVerifying(false);
     }
   };
 
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
     if (password === '7513') {
-      setIsAuthenticated(true);
+      setViewMode('dashboard');
       setPassword('');
     } else {
       toast({
@@ -153,25 +86,99 @@ const Admin = () => {
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
+    setViewMode('landing');
     toast({ title: "Você foi desconectado." });
   };
 
-  if (!isAuthenticated) {
+  // ------------------------------------------------------------------
+  // Render: 1. Landing Page (Selection)
+  // ------------------------------------------------------------------
+  if (viewMode === 'landing') {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-muted/20 flex flex-col items-center justify-center p-4">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-foreground mb-4">
+              Acesso <span className="text-primary">Restrito</span>
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Selecione a área que deseja acessar
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+            {/* Card 1: Admin Panel */}
+            <Card
+              className="cursor-pointer hover:shadow-xl transition-all duration-300 border-primary/20 hover:border-primary group"
+              onClick={() => setViewMode('login_admin')}
+            >
+              <CardHeader className="text-center">
+                <div className="mx-auto bg-primary/10 p-4 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Settings className="h-12 w-12 text-primary" />
+                </div>
+                <CardTitle className="text-2xl">Área Administrativa</CardTitle>
+                <CardDescription>Gerenciamento geral da plataforma e relatórios</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center pb-8">
+                <Button className="w-full">Entrar com Senha</Button>
+              </CardContent>
+            </Card>
+
+            {/* Card 2: Nomination */}
+            <Card
+              className="cursor-pointer hover:shadow-xl transition-all duration-300 border-secondary/20 hover:border-secondary group"
+              onClick={() => setViewMode('verify_supervisor')}
+            >
+              <CardHeader className="text-center">
+                <div className="mx-auto bg-secondary/10 p-4 rounded-full mb-4 group-hover:bg-secondary/20 transition-colors">
+                  <ShieldCheck className="h-12 w-12 text-secondary" />
+                </div>
+                <CardTitle className="text-2xl">Nomeação de Supervisores</CardTitle>
+                <CardDescription>Área exclusiva para membros nomeados</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center pb-8">
+                <Button variant="secondary" className="w-full">Validar Acesso</Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // Render: 2. Login Admin (Password)
+  // ------------------------------------------------------------------
+  if (viewMode === 'login_admin') {
     return (
       <Layout>
         <div className="flex justify-center items-center min-h-screen bg-muted/20">
-          <Card className="w-full max-w-md mx-4">
+          <Card className="w-full max-w-md mx-4 animate-in fade-in zoom-in-95 duration-300">
             <CardHeader>
-              <CardTitle className="text-center text-2xl font-bold text-primary">Área Administrativa</CardTitle>
+              <Button variant="ghost" className="w-fit mb-2 pl-0 hover:bg-transparent hover:text-primary" onClick={() => setViewMode('landing')}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+              </Button>
+              <CardTitle className="text-center text-2xl font-bold text-primary flex flex-col items-center gap-2">
+                <Lock className="h-8 w-8" />
+                Login Administrativo
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-6">
                 <div>
                   <Label htmlFor="password">Senha de Acesso</Label>
-                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Digite a senha" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="Digite a senha"
+                    autoFocus
+                    className="mt-2"
+                  />
                 </div>
-                <Button type="submit" className="w-full">Entrar</Button>
+                <Button type="submit" className="w-full text-lg py-6">Acessar Painel</Button>
               </form>
             </CardContent>
           </Card>
@@ -180,6 +187,52 @@ const Admin = () => {
     );
   }
 
+  // ------------------------------------------------------------------
+  // Render: 3. Verify Supervisor (CPF)
+  // ------------------------------------------------------------------
+  if (viewMode === 'verify_supervisor') {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center min-h-screen bg-muted/20">
+          <Card className="w-full max-w-md mx-4 animate-in fade-in zoom-in-95 duration-300 border-secondary/20">
+            <CardHeader>
+              <Button variant="ghost" className="w-fit mb-2 pl-0 hover:bg-transparent hover:text-secondary" onClick={() => setViewMode('landing')}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+              </Button>
+              <CardTitle className="text-center text-2xl font-bold text-secondary flex flex-col items-center gap-2">
+                <Shield className="h-8 w-8" />
+                Validação de Acesso
+              </CardTitle>
+              <CardDescription className="text-center">
+                Esta área é restrita para membros que já possuem nomeação.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label htmlFor="verify-cpf">Confirme seu CPF</Label>
+                <Input
+                  id="verify-cpf"
+                  placeholder="000.000.000-00"
+                  value={verifyCpf}
+                  onChange={(e) => setVerifyCpf(e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2').slice(0, 14))}
+                  className="mt-2 text-lg"
+                  autoFocus
+                />
+              </div>
+              <Button onClick={handleVerifyAccess} disabled={isVerifying} className="w-full text-lg py-6 bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+                {isVerifying ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                Verificar Acesso
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // Render: 4. Dashboard (Authenticated)
+  // ------------------------------------------------------------------
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -194,7 +247,7 @@ const Admin = () => {
                 </h1>
               </div>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Gerencie os parceiros da Frota Brasil
+                Painel de Controle Geral
               </p>
               <div className="mt-6 flex justify-center items-center space-x-4">
                 <Button variant="outline" size="sm" onClick={handleLogout} className="btn-primary">
@@ -203,152 +256,33 @@ const Admin = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Formulário para adicionar parceiro */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Plus className="h-5 w-5" />
-                    <span>Adicionar Novo Parceiro</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <Label htmlFor="nome">Nome do Parceiro *</Label>
-                      <Input
-                        id="nome"
-                        type="text"
-                        value={formData.nome}
-                        onChange={(e) => handleInputChange('nome', e.target.value)}
-                        placeholder="Digite o nome do parceiro"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="imagem">Imagem do Parceiro (opcional)</Label>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="file-upload" className="cursor-pointer">
-                            <div className="flex items-center space-x-2 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg hover:border-primary/50 transition-colors">
-                              <Upload className="h-5 w-5 text-muted-foreground" />
-                              <span className="text-sm text-muted-foreground">
-                                {selectedFile ? selectedFile.name : 'Clique para selecionar uma imagem'}
-                              </span>
-                            </div>
-                          </Label>
-                          <Input
-                            id="file-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                          />
-                        </div>
-
-                        {imagePreview && (
-                          <div className="flex justify-center">
-                            <img
-                              src={imagePreview}
-                              alt="Preview"
-                              className="w-32 h-32 object-cover rounded-lg border"
-                            />
-                          </div>
-                        )}
-
-                        <div className="text-sm text-muted-foreground">
-                          Ou forneça uma URL diretamente:
-                        </div>
-                        <Input
-                          id="imagem"
-                          type="url"
-                          value={formData.imagem || ''} // Ensure value is not null for input
-                          onChange={(e) => handleInputChange('imagem', e.target.value)}
-                          placeholder="https://exemplo.com/imagem.jpg"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="endereco">Endereço</Label>
-                      <Textarea
-                        id="endereco"
-                        value={formData.endereco}
-                        onChange={(e) => handleInputChange('endereco', e.target.value)}
-                        placeholder="Rua, número, bairro, cidade - UF"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="site">Site (opcional)</Label>
-                      <Input
-                        id="site"
-                        type="url"
-                        value={formData.site}
-                        onChange={(e) => handleInputChange('site', e.target.value)}
-                        placeholder="https://exemplo.com.br"
-                      />
-                    </div>
-
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      {!isSubmitting && <Plus className="h-4 w-4 mr-2" />}
-                      Adicionar Parceiro
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-
-              {/* Lista de parceiros existentes */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Users className="h-5 w-5" />
-                    <span>Parceiros Cadastrados ({parceirosList.length})</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4 max-h-[30rem] overflow-y-auto">
-                    {isLoadingList ? (
-                      <div className="flex justify-center items-center h-32">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                      </div>
-                    ) : parceirosList.length > 0 ? (
-                      parceirosList.map((parceiro) => (
-                        <div key={parceiro.id} className="p-4 bg-muted/20 rounded-lg">
-                          <div className="flex items-start space-x-3">
-                            <img 
-                              src={parceiro.imagem} 
-                              alt={parceiro.nome}
-                              className="w-16 h-16 object-cover rounded-lg"
-                            />
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-foreground">{parceiro.nome}</h4>
-                              <p className="text-sm text-muted-foreground">{parceiro.endereco}</p>
-                              {parceiro.site && (
-                                <a 
-                                  href={parceiro.site} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-primary hover:underline"
-                                >
-                                  {parceiro.site}
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-center text-muted-foreground py-8">
-                        Nenhum parceiro cadastrado ainda
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Admin Navigation Buttons */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+              <Link to="/admin/parceiros" className="w-full">
+                <Button className="w-full h-24 text-lg flex flex-col items-center justify-center space-y-2 bg-primary hover:bg-primary/90">
+                  <Users className="h-8 w-8" />
+                  <span>Parceiros</span>
+                </Button>
+              </Link>
+              <Link to="/admin/nomeacoes" className="w-full">
+                <Button className="w-full h-24 text-lg flex flex-col items-center justify-center space-y-2 bg-secondary hover:bg-secondary/90">
+                  <UserCheck className="h-8 w-8" />
+                  <span>Fazer Nomeações</span>
+                </Button>
+              </Link>
+              <Link to="/admin/relatorios" className="w-full">
+                <Button className="w-full h-24 text-lg flex flex-col items-center justify-center space-y-2 bg-accent hover:bg-accent/90 text-white">
+                  <FileText className="h-8 w-8" />
+                  <span>Relatórios</span>
+                </Button>
+              </Link>
+              <Button className="h-24 text-lg flex flex-col items-center justify-center space-y-2 bg-muted-foreground hover:bg-muted-foreground/90 text-white">
+                <Edit className="h-8 w-8" />
+                <span>Editar Associados</span>
+              </Button>
             </div>
+
+
           </div>
         </section>
       </div>

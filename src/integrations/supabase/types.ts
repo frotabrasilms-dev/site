@@ -27,6 +27,13 @@ export type Database = {
           cidade: string | null
           estado: string | null
           numero_imovel: string | null
+          apelido: string | null
+          numero_associado: string | null
+          nomeado: boolean
+          nomeacao: string | null
+          observacao: string | null
+          senha: string | null
+          data_nascimento: string | null
           created_at: string
         }
         Insert: {
@@ -41,6 +48,13 @@ export type Database = {
           cidade?: string | null
           estado?: string | null
           numero_imovel?: string | null
+          apelido?: string | null
+          numero_associado?: string | null
+          nomeado?: boolean
+          nomeacao?: string | null
+          observacao?: string | null
+          senha?: string | null
+          data_nascimento?: string | null
           created_at?: string
         }
         Update: {
@@ -55,6 +69,13 @@ export type Database = {
           cidade?: string | null
           estado?: string | null
           numero_imovel?: string | null
+          apelido?: string | null
+          numero_associado?: string | null
+          nomeado?: boolean
+          nomeacao?: string | null
+          observacao?: string | null
+          senha?: string | null
+          data_nascimento?: string | null
           created_at?: string
         }
         Relationships: []
@@ -66,6 +87,7 @@ export type Database = {
           imagem: string | null
           endereco: string | null
           site: string | null
+          observacao: string | null
           created_at: string
         }
         Insert: {
@@ -74,6 +96,7 @@ export type Database = {
           imagem?: string | null
           endereco?: string | null
           site?: string | null
+          observacao?: string | null
           created_at?: string
         }
         Update: {
@@ -82,6 +105,7 @@ export type Database = {
           imagem?: string | null
           endereco?: string | null
           site?: string | null
+          observacao?: string | null
           created_at?: string
         }
         Relationships: []

@@ -13,12 +13,11 @@ const Footer = () => {
     ],
     servicos: [
       { name: 'Cursos EAD', href: '/cursos' },
-      { name: 'Telemedicina 24h', href: '/beneficios#telemedicina' },
       { name: 'BDM Bank', href: '/beneficios#banco' },
       { name: 'Orientação Jurídica', href: '/beneficios#juridico' },
     ],
     recursos: [
-      { name: 'Blog', href: '/blog' },
+
       { name: 'Contato', href: '/contato' },
       { name: 'FAQ', href: '/associacao#faq' },
       { name: 'Suporte', href: '/contato#suporte' },
@@ -26,7 +25,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer id="footer-contato" className="bg-primary text-primary-foreground">
       <div className="container-custom py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Logo e Descrição */}
@@ -45,20 +44,19 @@ const Footer = () => {
               </div>
             </Link>
             <p className="text-sm opacity-90 mb-6 leading-relaxed">
-              Trabalhando por pessoas. Apoiando caminhoneiros e motoristas profissionais 
-              com benefícios essenciais e capacitação em todo o Brasil.
+              Junte-se à Associação Frota Brasil e faça parte de uma rede que valoriza, protege e fortalece quem move o país. Associe-se agora e caminhe conosco.
             </p>
             <div className="flex space-x-4">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
-                 className="p-2 bg-primary-foreground/10 rounded-lg hover:bg-primary-foreground/20 transition-colors">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"
+                className="p-2 bg-primary-foreground/10 rounded-lg hover:bg-primary-foreground/20 transition-colors">
                 <Facebook className="h-5 w-5" />
               </a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
-                 className="p-2 bg-primary-foreground/10 rounded-lg hover:bg-primary-foreground/20 transition-colors">
+                className="p-2 bg-primary-foreground/10 rounded-lg hover:bg-primary-foreground/20 transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
               <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"
-                 className="p-2 bg-primary-foreground/10 rounded-lg hover:bg-primary-foreground/20 transition-colors">
+                className="p-2 bg-primary-foreground/10 rounded-lg hover:bg-primary-foreground/20 transition-colors">
                 <Youtube className="h-5 w-5" />
               </a>
             </div>
@@ -70,8 +68,8 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.navegacao.map((link) => (
                 <li key={link.name}>
-                  <Link 
-                    to={link.href} 
+                  <Link
+                    to={link.href}
                     className="text-sm opacity-90 hover:opacity-100 hover:text-accent transition-colors"
                   >
                     {link.name}
@@ -87,8 +85,8 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.servicos.map((link) => (
                 <li key={link.name}>
-                  <Link 
-                    to={link.href} 
+                  <Link
+                    to={link.href}
                     className="text-sm opacity-90 hover:opacity-100 hover:text-accent transition-colors"
                   >
                     {link.name}
@@ -102,9 +100,12 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-lg mb-4">Contato</h3>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-accent flex-shrink-0" />
-                <span className="text-sm opacity-90">(67) 99646-3487</span>
+              <div className="flex items-start space-x-3">
+                <Phone className="h-4 w-4 text-accent flex-shrink-0 mt-1" />
+                <div className="flex flex-col space-y-1">
+                  <span className="text-sm opacity-90">Donner (67) 9 8479-6030</span>
+                  <span className="text-sm opacity-90">Irani (67) 9 8467-8018</span>
+                </div>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-accent flex-shrink-0" />
@@ -113,8 +114,16 @@ const Footer = () => {
               <div className="flex items-start space-x-3">
                 <MapPin className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
                 <span className="text-sm opacity-90">
-                  Atendimento em todo<br />território nacional
+                  Rodovia BR-163, 56, sala 02 - Campo Grande - MS
                 </span>
+              </div>
+              <div className="pt-4 mt-2 border-t border-primary-foreground/10">
+                <Link to="/politica-privacidade" className="flex items-center space-x-2 text-sm opacity-90 hover:opacity-100 hover:text-accent group">
+                  <span className="group-hover:underline">Políticas de Privacidade</span>
+                </Link>
+                <Link to="/termos-uso" className="flex items-center space-x-2 text-sm opacity-90 hover:opacity-100 hover:text-accent group mt-2">
+                  <span className="group-hover:underline">Termos de Uso</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -124,15 +133,12 @@ const Footer = () => {
         <div className="border-t border-primary-foreground/20 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm opacity-80">
-              © {currentYear} Associação Frota Brasil. Todos os direitos reservados.
+              © {currentYear} Associação Frota Brasil. CNPJ 47.532.560/0001-50
             </div>
             <div className="flex space-x-6 text-sm">
-              <Link to="/privacidade" className="opacity-80 hover:opacity-100 transition-opacity">
-                Política de Privacidade
-              </Link>
-              <Link to="/termos" className="opacity-80 hover:opacity-100 transition-opacity">
-                Termos de Uso
-              </Link>
+              <a href="https://engecomms.com.br/" target="_blank" rel="noopener noreferrer" className="opacity-80 hover:opacity-100 transition-opacity">
+                https://engecomms.com.br/
+              </a>
             </div>
           </div>
         </div>

@@ -33,7 +33,7 @@ const Parceiros = () => {
           <div className="container-custom">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-                Nossos <span className="text-primary">Parceiros</span>
+                Nossos <span className="text-primary">Apoiadores</span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 Conheça as empresas que confiam na Frota Brasil e fazem parte da nossa rede de parceiros
@@ -51,14 +51,13 @@ const Parceiros = () => {
                   <Card key={parceiro.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
                     <CardContent className="p-0">
                       {/* Imagem clicável */}
-                      <div 
-                        className={`aspect-video bg-muted flex items-center justify-center ${
-                          parceiro.site ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
-                        }`}
+                      <div
+                        className={`aspect-video bg-muted flex items-center justify-center ${parceiro.site ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+                          }`}
                         onClick={() => handleImageClick(parceiro.site)}
                       >
-                        <img 
-                          src={parceiro.imagem} 
+                        <img
+                          src={parceiro.imagem}
                           alt={parceiro.nome}
                           className="w-full h-full object-cover"
                         />
@@ -68,20 +67,20 @@ const Parceiros = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       {/* Informações do parceiro */}
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-foreground mb-3">
                           {parceiro.nome}
                         </h3>
-                        
+
                         {parceiro.endereco && (
                           <div className="flex items-start space-x-2 text-muted-foreground">
                             <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
                             <p className="text-sm">{parceiro.endereco}</p>
                           </div>
                         )}
-                        
+
                         {parceiro.site && (
                           <div className="mt-4">
                             <button
@@ -113,12 +112,12 @@ const Parceiros = () => {
                 <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                   Junte-se à nossa rede de parceiros e ajude a fortalecer o setor de transporte no Brasil
                 </p>
-                <a
-                  href="/contato"
+                <button
+                  onClick={() => document.getElementById('footer-contato')?.scrollIntoView({ behavior: 'smooth' })}
                   className="btn-accent px-8 py-3 rounded-lg font-semibold hover:scale-105 transition-transform"
                 >
                   Entre em Contato
-                </a>
+                </button>
               </div>
             </div>
           </div>

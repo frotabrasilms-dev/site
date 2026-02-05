@@ -17,6 +17,7 @@ export const adicionarParceiro = async (novoParceiro: Omit<Parceiro, 'id' | 'cre
     imagem: novoParceiro.imagem === '' ? null : novoParceiro.imagem,
     endereco: novoParceiro.endereco === '' ? null : novoParceiro.endereco,
     site: novoParceiro.site === '' ? null : novoParceiro.site,
+    observacao: novoParceiro.observacao === '' ? null : novoParceiro.observacao,
   };
 
   const { data, error } = await supabase

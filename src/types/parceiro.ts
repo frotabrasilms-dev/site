@@ -5,4 +5,5 @@ export interface Parceiro {
   imagem: string | null;
   endereco: string | null;
   site: string | null;
+  observacao: string | null;
 }

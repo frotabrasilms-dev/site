@@ -3,11 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { 
-  GraduationCap, 
-  Clock, 
-  Award, 
-  Users, 
+import {
+  GraduationCap,
+  Clock,
+  Award,
+  Users,
   Play,
   Calendar,
   CheckCircle,
@@ -33,7 +33,7 @@ const Cursos = () => {
       studentsCount: 2500,
       topics: [
         'Legislação sobre produtos perigosos',
-        'Classificação de cargas perigosas', 
+        'Classificação de cargas perigosas',
         'Procedimentos de emergência',
         'Equipamentos de segurança',
         'Documentação obrigatória'
@@ -405,7 +405,7 @@ const Cursos = () => {
             Invista na Sua Carreira
           </h2>
           <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
-            Todos esses cursos estão inclusos na sua associação. 
+            Todos esses cursos estão inclusos na sua associação.
             Capacite-se e amplie suas oportunidades profissionais.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

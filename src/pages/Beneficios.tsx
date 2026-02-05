@@ -1,19 +1,19 @@
 import Layout from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Link } from 'react-router-dom';
-import { 
-  Stethoscope, 
-  CreditCard, 
-  Scale, 
-  GraduationCap, 
-  Shield, 
+import {
+  Stethoscope,
+  CreditCard,
+  Scale,
+  GraduationCap,
+  Shield,
   Truck,
   Check,
   X,
@@ -26,22 +26,6 @@ import {
 
 const Beneficios = () => {
   const benefits = [
-    {
-      id: 'telemedicina',
-      icon: Stethoscope,
-      title: 'Telemedicina 24h',
-      summary: 'Atendimento médico online disponível 24 horas por dia, 7 dias da semana',
-      features: [
-        'Consultas médicas por vídeo ou telefone',
-        'Receitas médicas digitais válidas',
-        'Orientações de emergência',
-        'Especialistas em medicina do trabalho',
-        'Histórico médico digitalizado',
-        'Sem limite de consultas'
-      ],
-      color: 'text-accent',
-      bgColor: 'bg-accent/10'
-    },
     {
       id: 'banco',
       icon: CreditCard,
@@ -276,20 +260,6 @@ const Beneficios = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer">
               <CardContent className="p-6 text-center">
-                <Stethoscope className="h-12 w-12 text-accent mx-auto mb-4" />
-                <h3 className="font-bold text-primary mb-2">Demo Telemedicina</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Veja como funciona a consulta online
-                </p>
-                <Button variant="outline" size="sm">
-                  <Globe className="h-4 w-4 mr-2" />
-                  Acessar Demo
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer">
-              <CardContent className="p-6 text-center">
                 <GraduationCap className="h-12 w-12 text-secondary mx-auto mb-4" />
                 <h3 className="font-bold text-primary mb-2">Portal EAD</h3>
                 <p className="text-sm text-muted-foreground mb-4">
@@ -337,14 +307,10 @@ const Beneficios = () => {
       <section className="py-20 hero-gradient text-white">
         <div className="container-custom text-center">
           <h2 className="text-4xl font-bold mb-6 text-shadow">
-            Todos Esses Benefícios por
+            Todos Esses Benefícios
           </h2>
           <div className="mb-8">
             <div className="text-6xl font-bold text-accent mb-2">GRÁTIS</div>
-            <div className="text-xl opacity-90">Durante todo o ano de 2025</div>
-            <div className="text-sm opacity-80 mt-2">
-              Associação 100% gratuita para sempre
-            </div>
           </div>
           <Link to="/associacao">
             <Button className="btn-accent px-8 py-4 text-lg font-bold rounded-xl hover:scale-105 transition-transform">

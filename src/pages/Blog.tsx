@@ -3,9 +3,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { 
-  Calendar, 
-  User, 
+import {
+  Calendar,
+  User,
   Search,
   Clock,
   ArrowRight,
@@ -36,18 +36,6 @@ const Blog = () => {
   };
 
   const blogPosts = [
-    {
-      id: 2,
-      title: 'Como Funciona a Telemedicina 24h da Frota Brasil',
-      summary: 'Entenda como utilizar o serviço de telemedicina disponível para todos os associados, com médicos especializados em medicina do trabalho.',
-      author: 'Dr. Carlos Silva',
-      date: '12 Dez 2024',
-      readTime: '7 min',
-      category: 'Saúde',
-      views: 1800,
-      likes: 98,
-      comments: 15
-    },
     {
       id: 3,
       title: 'Curso de MOPP: Tudo Que Você Precisa Saber',
@@ -121,7 +109,7 @@ const Blog = () => {
   ];
 
   const popularTags = [
-    'MOPP', 'Telemedicina', 'BDM Bank', 'CNH', 'Direção Defensiva', 
+    'MOPP', 'Telemedicina', 'BDM Bank', 'CNH', 'Direção Defensiva',
     'Combustível', 'Segurança', 'Documentos', 'Benefícios', 'Cursos EAD'
   ];
 
@@ -153,8 +141,8 @@ const Blog = () => {
           <div className="max-w-2xl mx-auto">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input 
-                placeholder="Pesquisar artigos, dicas, notícias..." 
+              <Input
+                placeholder="Pesquisar artigos, dicas, notícias..."
                 className="pl-12 pr-4 py-4 text-lg"
               />
               <Button className="absolute right-2 top-1/2 transform -translate-y-1/2 btn-primary">
@@ -175,7 +163,7 @@ const Blog = () => {
                 <TrendingUp className="h-5 w-5 text-accent" />
                 <span className="text-accent font-semibold">Em Destaque</span>
               </div>
-              
+
               <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-0">
                   <div className="aspect-video bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
@@ -185,7 +173,7 @@ const Blog = () => {
                       <p className="opacity-90">Conta bancária gratuita para associados</p>
                     </div>
                   </div>
-                  
+
                   <div className="p-8">
                     <div className="flex items-center space-x-4 mb-4">
                       <Badge className="bg-accent text-accent-foreground">Benefícios</Badge>
@@ -198,15 +186,15 @@ const Blog = () => {
                         <span className="text-sm">5 min de leitura</span>
                       </div>
                     </div>
-                    
+
                     <h2 className="text-2xl font-bold text-primary mb-4">
                       {featuredPost.title}
                     </h2>
-                    
+
                     <p className="text-muted-foreground leading-relaxed mb-6">
                       {featuredPost.summary}
                     </p>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2">
@@ -254,15 +242,15 @@ const Blog = () => {
                         <span className="text-sm">{post.readTime}</span>
                       </div>
                     </div>
-                    
+
                     <h3 className="text-xl font-bold text-primary mb-3 hover:text-accent transition-colors cursor-pointer">
                       {post.title}
                     </h3>
-                    
+
                     <p className="text-muted-foreground leading-relaxed mb-4">
                       {post.summary}
                     </p>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2">
@@ -379,8 +367,8 @@ const Blog = () => {
                 <p className="text-sm opacity-90 mb-4">
                   Receba as principais notícias e dicas por email
                 </p>
-                <Input 
-                  placeholder="Seu email" 
+                <Input
+                  placeholder="Seu email"
                   className="mb-3 bg-white text-foreground"
                 />
                 <Button className="w-full bg-white text-primary hover:bg-white/90">
