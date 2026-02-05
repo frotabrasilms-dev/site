@@ -436,7 +436,7 @@ const Associacao = () => {
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold text-primary mb-4">
-                  Formulário de Associação
+                  Unir-se à Frota
                 </h2>
                 <p className="text-xl text-muted-foreground">
                   Preencha seus dados para começar a aproveitar os benefícios
