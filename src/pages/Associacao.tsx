@@ -840,10 +840,12 @@ const Associacao = () => {
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Chamar no WhatsApp
                   </Button>
-                  <Button variant="outline" className="border-white text-white hover:bg-white/10 px-6 py-3">
-                    <Clock className="mr-2 h-4 w-4" />
-                    Horário: 8h às 18h
-                  </Button>
+                  <a href="https://wa.me/5567984678018" target="_blank" rel="noopener noreferrer">
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white border-none px-6 py-3">
+                      <Clock className="mr-2 h-4 w-4" />
+                      Horário: 8h às 18h
+                    </Button>
+                  </a>
                 </div>
               </CardContent>
             </Card>
