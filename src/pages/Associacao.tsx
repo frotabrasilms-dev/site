@@ -72,7 +72,7 @@ const Associacao = () => {
     senha: '',
     confirmacaoSenha: '',
     dataNascimento: '',
-    supervisor: '000',
+    supervisor: '',
   });
   const [isSupervisorFocused, setIsSupervisorFocused] = useState(false);
   const [submittedData, setSubmittedData] = useState<typeof formData | null>(null);
