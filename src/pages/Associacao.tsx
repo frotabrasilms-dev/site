@@ -216,7 +216,7 @@ const Associacao = () => {
   const faqs = [
     {
       question: 'A associação é realmente gratuita para sempre?',
-      answer: 'Sim, não será cobrada mensalidade. Porém a partir de 50.000 associados, será cobrado aos novos associados uma taxa de adesão.'
+      answer: 'Sim, não será cobrada mensalidade. Porém a partir de 50.000 associados, será cobrado aos novos associados uma contribuição de adesão.'
     },
     {
       question: 'Quais documentos preciso para me associar?',
