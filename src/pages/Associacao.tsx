@@ -683,7 +683,7 @@ const Associacao = () => {
 
                       <div className="relative">
                         <Label htmlFor="supervisor" className="text-primary font-semibold">
-                          Supervisor
+                          Indicador/Subdelegado
                         </Label>
                         <Input
                           id="supervisor"
