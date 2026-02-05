@@ -323,6 +323,20 @@ const Associacao = () => {
         title: "Cadastro OK!",
         description: "Associação realizada com sucesso. Você será redirecionado para a página inicial em 3 segundos.",
       });
+
+      // Insert into vinculos_associados
+      const { error: errorVinculo } = await supabase
+        .from('vinculos_associados')
+        .insert({
+          associado_id: insertData.cpf,
+          supervisor_posicao_id: insertData.supervisor,
+          data_entrada: new Date().toISOString()
+        });
+
+      if (errorVinculo) {
+        console.error('Erro ao criar vinculo:', errorVinculo);
+        // Não mostrar erro ao usuário se o cadastro principal funcionou, apenas logar
+      }
       setSubmittedData(formData);
       setFormData({
         nome: '', cpf: '', email: '', telefone: '', cep: '',
