@@ -21,6 +21,14 @@ import NotFound from "./pages/NotFound";
 import EFB from "./pages/EFB";
 import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
 import TermosUso from "./pages/TermosUso";
+import EditarPerfil from "./pages/EditarPerfil";
+import Estados from "./pages/Estados";
+import ApoiadoresEstado from "./pages/ApoiadoresEstado";
+import CalculadoraFrete from "./pages/CalculadoraFrete";
+import AssistenteJuridico from "./pages/AssistenteJuridico";
+
+import RelatorioMunicipio from "./pages/RelatorioMunicipio";
+import RelatorioSupervisor from "./pages/RelatorioSupervisor";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +56,11 @@ const App = () => (
           <Route path="/efb" element={<EFB />} />
           <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
           <Route path="/termos-uso" element={<TermosUso />} />
+          <Route path="/admin/relatorios/estados" element={<Estados />} />
+          <Route path="/editar-perfil" element={<EditarPerfil />} />
+          <Route path="/apoiadores/:uf" element={<ApoiadoresEstado />} />
+          <Route path="/ferramentas/calculadora-frete" element={<CalculadoraFrete />} />
+          <Route path="/ferramentas/assistente-juridico" element={<AssistenteJuridico />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

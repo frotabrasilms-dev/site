@@ -11,11 +11,7 @@ const Footer = () => {
       { name: 'Benefícios', href: '/beneficios' },
       { name: 'Associação', href: '/associacao' },
     ],
-    servicos: [
-      { name: 'Cursos EAD', href: '/cursos' },
-      { name: 'BDM Bank', href: '/beneficios#banco' },
-      { name: 'Orientação Jurídica', href: '/beneficios#juridico' },
-    ],
+
     recursos: [
 
       { name: 'Contato', href: '/contato' },
@@ -55,8 +51,7 @@ const Footer = () => {
                 className="p-2 bg-primary-foreground/10 rounded-lg hover:bg-primary-foreground/20 transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"
-                className="p-2 bg-primary-foreground/10 rounded-lg hover:bg-primary-foreground/20 transition-colors">
+              <a href="https://www.youtube.com/channel/UCndPgKESvMHLjdr9_v_HU9Q" target="_blank" rel="noopener noreferrer" className="bg-gray-800 p-2 rounded-full hover:bg-red-600 transition-colors">
                 <Youtube className="h-5 w-5" />
               </a>
             </div>
@@ -79,22 +74,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Serviços */}
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Serviços</h3>
-            <ul className="space-y-3">
-              {footerLinks.servicos.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="text-sm opacity-90 hover:opacity-100 hover:text-accent transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+
 
           {/* Contato */}
           <div>
@@ -103,8 +83,7 @@ const Footer = () => {
               <div className="flex items-start space-x-3">
                 <Phone className="h-4 w-4 text-accent flex-shrink-0 mt-1" />
                 <div className="flex flex-col space-y-1">
-                  <span className="text-sm opacity-90">Donner (67) 9 8479-6030</span>
-                  <span className="text-sm opacity-90">Irani (67) 9 8467-8018</span>
+                  <span className="text-sm opacity-90">(67) 3424-4211</span>
                 </div>
               </div>
               <div className="flex items-center space-x-3">

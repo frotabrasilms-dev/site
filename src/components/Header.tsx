@@ -1,10 +1,33 @@
 import { useState } from 'react';
-import { Menu, X, Truck } from 'lucide-react';
+import { Menu, X, Truck, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const [profilePic, setProfilePic] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const userCpf = localStorage.getItem('user_cpf');
+      if (userCpf) {
+        const { data } = await supabase
+          .from('associados')
+          .select('foto_url')
+          .eq('cpf', userCpf.replace(/\D/g, ''))
+          .single();
+
+        // Cast to any to avoid TS error if types are outdated
+        const profileData = data as any;
+        if (profileData?.foto_url) {
+          setProfilePic(profileData.foto_url);
+        }
+      }
+    };
+    fetchProfile();
+  }, [location.pathname]);
 
   const navigation = [
     { name: 'Início', href: '/' },
@@ -64,6 +87,14 @@ const Header = () => {
             >
               Entrar
             </Link>
+            {profilePic && (
+              <Link
+                to="/ferramentas/editar-perfil"
+                className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-green-500 hover:opacity-80 transition-opacity shadow-sm"
+              >
+                <img src={profilePic} alt="Meu Perfil" className="w-full h-full object-cover" />
+              </Link>
+            )}
             <Link
               to="/associacao"
               className="px-6 py-2.5 rounded-lg font-bold text-sm text-white bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 shadow-lg shadow-green-500/30 hover:shadow-green-500/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center"
@@ -100,6 +131,19 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
+
+              {profilePic && (
+                <Link
+                  to="/ferramentas/editar-perfil"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-gray-50 border border-gray-100 mb-2 mt-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-green-500">
+                    <img src={profilePic} alt="Meu Perfil" className="w-full h-full object-cover" />
+                  </div>
+                  <span className="font-bold text-gray-700">Meu Perfil</span>
+                </Link>
+              )}
               <div className="pt-4 mt-4 border-t border-gray-100 flex flex-col space-y-3 px-4">
                 <Link
                   to="/login"

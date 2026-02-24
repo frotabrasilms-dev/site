@@ -8,23 +8,35 @@ import {
     Truck,
     Bot,
     Lock,
-    AlertTriangle
+    AlertTriangle,
+    User
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const Ferramentas = () => {
+    const navigate = useNavigate();
     const tools = [
+        {
+            icon: User,
+            title: 'Editar Perfil',
+            description: 'Atualize seus dados cadastrais e foto.',
+            color: 'bg-green-100 text-green-600',
+            path: '/editar-perfil'
+        },
         {
             icon: Calculator,
             title: 'Calculadora de Frete',
             description: 'Calcule o valor ideal do frete considerando distância, combustível e pedágios.',
-            color: 'bg-blue-100 text-blue-600'
+            color: 'bg-blue-100 text-blue-600',
+            path: '/ferramentas/calculadora-frete'
         },
         {
             icon: Scale,
             title: 'Assistente Jurídico (Multas)',
             description: 'Análise preliminar e orientações para recursos de infrações de trânsito.',
-            color: 'bg-red-100 text-red-600'
+            color: 'bg-red-100 text-red-600',
+            path: '/ferramentas/assistente-juridico'
         },
         {
             icon: Gavel,
@@ -81,7 +93,7 @@ const Ferramentas = () => {
                             <Card
                                 key={index}
                                 className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-t-4 border-t-primary"
-                                onClick={() => handleToolClick(tool.title, tool.description)}
+                                onClick={() => (tool as any).path ? navigate((tool as any).path) : handleToolClick(tool.title, tool.description)}
                             >
                                 <CardContent className="p-8">
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${tool.color}`}>

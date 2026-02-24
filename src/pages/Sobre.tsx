@@ -177,13 +177,7 @@ const Sobre = () => {
                   para quem move o nosso país", diz Donner.
                 </p>
               </div>
-              <div className="mt-8">
-                <Link to="/contato">
-                  <Button className="btn-primary px-6 py-3">
-                    Fale com o Presidente
-                  </Button>
-                </Link>
-              </div>
+
             </div>
             <div className="order-1 lg:order-2">
               <Card className="overflow-hidden">
@@ -334,7 +328,7 @@ const Sobre = () => {
             <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               <CardContent className="p-0">
                 <img
-                  src="/foto-bdm.jpg"
+                  src="/parce.png"
                   alt="Parceria BDM Digital"
                   className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700"
                 />
@@ -354,6 +348,32 @@ const Sobre = () => {
                 <div className="p-6 text-center">
                   <p className="font-bold text-primary text-lg">Eventos e Celebrações</p>
                   <p className="text-muted-foreground text-sm">União da família Frota Brasil</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <CardContent className="p-0">
+                <img
+                  src="/rinaldo.png"
+                  alt="Apoio do deputado estadual Rinaldo Modesto"
+                  className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700"
+                />
+                <div className="p-6 text-center">
+                  <p className="font-bold text-primary text-lg">Apoio Parlamentar</p>
+                  <p className="text-muted-foreground text-sm">Deputado Estadual Rinaldo Modesto</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <CardContent className="p-0">
+                <img
+                  src="/4andar.jpeg"
+                  alt="Inauguração do quarto andar do Hospital do Câncer, Campo Grande"
+                  className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700"
+                />
+                <div className="p-6 text-center">
+                  <p className="font-bold text-primary text-lg">Inauguração no HC</p>
+                  <p className="text-muted-foreground text-sm">Inauguração do quarto andar do Hospital do Câncer, Campo Grande</p>
                 </div>
               </CardContent>
             </Card>
@@ -401,6 +421,9 @@ const Sobre = () => {
             <h2 className="text-4xl font-bold mb-4 text-shadow">
               Impacto em Números
             </h2>
+            <p className="text-2xl font-bold mb-2 text-white/90">
+              AFB 2026 (quarto ano)
+            </p>
             <p className="text-xl opacity-90">
               Em Movimento Nacional
             </p>
@@ -421,7 +444,7 @@ const Sobre = () => {
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-accent mb-2">100%</div>
-              <div className="text-lg">Sempre Gratuito</div>
+              <div className="text-lg">Isento de mensalidade</div>
             </div>
           </div>
         </div>

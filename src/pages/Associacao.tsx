@@ -31,7 +31,9 @@ import {
   Printer,
   Trash2,
   RefreshCw,
-  Download
+  Download,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import {
   Dialog,
@@ -45,6 +47,9 @@ import {
 const Associacao = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+
+
+  const [showAgeRestrictionModal, setShowAgeRestrictionModal] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -76,6 +81,10 @@ const Associacao = () => {
   });
   const [isSupervisorFocused, setIsSupervisorFocused] = useState(false);
   const [submittedData, setSubmittedData] = useState<typeof formData | null>(null);
+  const [assignedMemberNumber, setAssignedMemberNumber] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [supervisorName, setSupervisorName] = useState<string | null>(null);
 
   // Camera State
   const [photo, setPhoto] = useState<string | null>(null);
@@ -84,6 +93,93 @@ const Associacao = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [nextMemberNumber, setNextMemberNumber] = useState<string>('1');
+
+  // Buscar o próximo número de associado ao carregar a página
+  useEffect(() => {
+    const fetchNextMemberNumber = async () => {
+      try {
+        console.log('🔍 Buscando último ID de associado do banco...');
+        const { data, error } = await supabase
+          .from('associados')
+          .select('id')
+          .order('id', { ascending: false })
+          .limit(1)
+          .single();
+
+        console.log('📊 Resultado da busca:', data, error);
+
+        if (data && data.id) {
+          const lastId = parseInt(data.id);
+          const nextNum = lastId + 1 + 130000;
+          console.log(`✅ Último ID: ${lastId}, Novo número será: ${nextNum}`);
+          setNextMemberNumber(nextNum.toString());
+        } else {
+          console.log('📭 Nenhum associado encontrado, começando do 130001');
+          setNextMemberNumber('130001');
+        }
+      } catch (err) {
+        console.error('❌ Erro ao buscar ID de associado:', err);
+        setNextMemberNumber('130001');
+      }
+    };
+
+    fetchNextMemberNumber();
+  }, []);
+
+  // Buscar nome do supervisor quando o ID tiver 6 dígitos
+  useEffect(() => {
+    const fetchSupervisorName = async () => {
+      const supervisorId = formData.supervisor;
+      if (supervisorId.length === 6) {
+        try {
+          // O ID digitado é o numero_associado, precisamos buscar o nome
+          // Assumindo que a coluna 'id' é a chave primária e 'numero_associado' é o que o usuário digita
+          // O usuário mencionou "o numero_associado field in the database should be set to the value of the ID being created plus 130000"
+          // Então se o usuário digita 130001, devemos buscar por esse número?
+          // O prompt diz "No campo indicador subdelegado/ O campo vai ter agora 6 números / Se preenchido vai no banco de dados dos associados e traz de lá o nome desse subdelegado ou desse associado"
+
+          // Vamos assumir que o campo de busca é o 'id' (PK) ou 'numero_associado'. 
+          // O código existente usa 'insertedData.numero_associado' e 'insertedData.id'.
+          // Normalmente o usuário digita o número da carteirinha (numero_associado).
+
+          const { data, error } = await supabase
+            .from('associados')
+            .select('nome')
+            .eq('numero_associado', supervisorId) // Tentando pelo número do associado primeiro
+            .single();
+
+          if (data) {
+            setSupervisorName(data.nome);
+          } else {
+            // Fallback: tentar pelo ID direto se numero_associado falhar ou se for o padrão
+            const { data: dataId, error: errorId } = await supabase
+              .from('associados')
+              .select('nome')
+              .eq('id', supervisorId)
+              .single();
+
+            if (dataId) {
+              setSupervisorName(dataId.nome);
+            } else {
+              setSupervisorName(null);
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao buscar supervisor:", error);
+          setSupervisorName(null);
+        }
+      } else {
+        setSupervisorName(null);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      if (formData.supervisor) fetchSupervisorName();
+    }, 500); // Debounce de 500ms
+
+    return () => clearTimeout(timeoutId);
+  }, [formData.supervisor]);
 
   const handleDownloadCard = async () => {
     if (cardRef.current) {
@@ -91,7 +187,14 @@ const Associacao = () => {
         const canvas = await html2canvas(cardRef.current, {
           scale: 2,
           backgroundColor: '#ffffff',
-          useCORS: true
+          useCORS: true,
+          onclone: (documentClone) => {
+            const element = documentClone.querySelector('.membership-card-container');
+            if (element) {
+              (element as HTMLElement).style.transform = 'none';
+              (element as HTMLElement).style.margin = '0';
+            }
+          }
         } as any);
         const image = canvas.toDataURL("image/png");
         const link = document.createElement('a');
@@ -260,6 +363,30 @@ const Associacao = () => {
       return;
     }
 
+    if (!formData.dataNascimento) {
+      toast({
+        title: "Erro",
+        description: "A data de nascimento é obrigatória.",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const birthDate = new Date(formData.dataNascimento);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    if (age < 16) {
+      setShowAgeRestrictionModal(true);
+      setIsLoading(false);
+      return;
+    }
+
     let insertData: any = {
       nome: formData.nome,
       cpf: formData.cpf.replace(/\D/g, ''),
@@ -279,35 +406,50 @@ const Associacao = () => {
 
     // Upload photo if exists
     if (photo) {
+      console.log('📸 Iniciando processo de upload da foto...');
       try {
         const response = await fetch(photo);
         const blob = await response.blob();
+        console.log('📦 Foto convertida para blob:', blob.size, 'bytes');
+
         const cleanCpf = formData.cpf.replace(/\D/g, '');
         const fileName = `${cleanCpf}.jpg`;
 
-        const { error: uploadError } = await supabase.storage
+        // Tentar primeiro fazer upload direto
+        // OBS: Políticas de Storage devem permitir public insert
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('member-photos')
           .upload(fileName, blob, {
             contentType: 'image/jpeg',
             upsert: true
           });
 
-        if (!uploadError) {
+        if (uploadError) {
+          console.error('❌ Erro no upload (storage):', uploadError);
+          toast({
+            title: "Aviso",
+            description: "Erro ao salvar a foto: " + uploadError.message,
+            variant: "destructive"
+          });
+        } else {
+          console.log('✅ Upload concluído:', uploadData);
           const { data: publicUrlData } = supabase.storage
             .from('member-photos')
             .getPublicUrl(fileName);
 
+          console.log('🔗 URL Pública gerada:', publicUrlData.publicUrl);
           insertData.foto_url = publicUrlData.publicUrl;
-        } else {
-          console.error('Error uploading photo:', uploadError);
         }
 
       } catch (photoError) {
-        console.error('Error processing photo:', photoError);
+        console.error('❌ Exceção ao processar foto:', photoError);
       }
+    } else {
+      console.log('⚠️ Nenhuma foto capturada para envio.');
     }
 
-    const { error } = await supabase.from('associados').insert(insertData);
+    console.log('🚀 Enviando dados para o banco:', insertData);
+    const { data: insertedData, error } = await supabase.from('associados').insert(insertData).select().single();
 
     setIsLoading(false);
 
@@ -315,7 +457,7 @@ const Associacao = () => {
       console.error('Erro ao inserir associado:', error);
       toast({
         title: "Erro ao associar-se",
-        description: "Não foi possível concluir sua associação. Verifique se seu CPF ou e-mail já estão cadastrados e tente novamente.",
+        description: `Erro: ${error.message || error.details || "Não foi possível concluir sua associação."}`,
         variant: "destructive",
       });
     } else {
@@ -325,10 +467,13 @@ const Associacao = () => {
       });
 
       // Insert into vinculos_associados
+      // Tentar usar ID se CPF falhar, ou vice-versa. O erro 400 indica falha de schema.
+      // Assumindo que associado_id é FK para associados.id (BIGINT)
       const { error: errorVinculo } = await supabase
-        .from('vinculos_associados')
+        .from('vinculos_associados' as any)
         .insert({
-          associado_id: insertData.cpf,
+          associado_id: insertedData.id, // Usando ID numérico
+          // Se o schema exigir CPF (string), revermigration. Mas IDs são padrão.
           supervisor_posicao_id: insertData.supervisor,
           data_entrada: new Date().toISOString()
         });
@@ -338,6 +483,7 @@ const Associacao = () => {
         // Não mostrar erro ao usuário se o cadastro principal funcionou, apenas logar
       }
       setSubmittedData(formData);
+      setAssignedMemberNumber(insertedData?.numero_associado || nextMemberNumber);
       setFormData({
         nome: '', cpf: '', email: '', telefone: '', cep: '',
         logradouro: '', bairro: '', cidade: '', numeroImovel: '', estado: '', apelido: '',
@@ -369,7 +515,7 @@ const Associacao = () => {
     } else if (field === 'senha' || field === 'confirmacaoSenha') {
       maskedValue = value.replace(/\D/g, '').slice(0, 6);
     } else if (field === 'supervisor') {
-      maskedValue = value.replace(/\D/g, '').slice(0, 3);
+      maskedValue = value.replace(/\D/g, '').slice(0, 6);
     }
 
     setFormData(prev => ({
@@ -392,9 +538,20 @@ const Associacao = () => {
             cidade: data.localidade,
             estado: data.uf,
           }));
+        } else {
+          toast({
+            title: "CEP não encontrado",
+            description: "Preencha manualmente seu endereço, bairro, cidade e estado.",
+            variant: "default",
+          });
         }
       } catch (error) {
         console.error('Erro ao buscar CEP:', error);
+        toast({
+          title: "Erro ao buscar CEP",
+          description: "Não foi possível validar o CEP automaticamente. Preencha manualmente.",
+          variant: "destructive",
+        });
       }
     }
   };
@@ -448,7 +605,10 @@ const Associacao = () => {
         <section className="py-20 bg-muted/30" id="formulario-associacao">
           <div className="container-custom">
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
+              <div className="text-center mb-8">
+                <div className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg text-xl font-bold mb-6">
+                  Você será o associado número: <span className="text-yellow-300">{nextMemberNumber}</span>
+                </div>
                 <h2 className="text-4xl font-bold text-primary mb-4">
                   Unir-se à Frota
                 </h2>
@@ -524,37 +684,63 @@ const Associacao = () => {
                         <Label htmlFor="senha" className="text-primary font-semibold">
                           Senha (6 números) *
                         </Label>
-                        <Input
-                          id="senha"
-                          type="password"
-                          placeholder="123456"
-                          value={formData.senha}
-                          onChange={(e) => handleInputChange('senha', e.target.value)}
-                          required
-                          className="mt-2"
-                          maxLength={6}
-                        />
+                        <div className="relative mt-2">
+                          <Input
+                            id="senha"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="123456"
+                            value={formData.senha}
+                            onChange={(e) => handleInputChange('senha', e.target.value)}
+                            required
+                            className="pr-10"
+                            maxLength={6}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       <div>
                         <Label htmlFor="confirmacaoSenha" className="text-primary font-semibold">
                           Confirmação da Senha *
                         </Label>
-                        <Input
-                          id="confirmacaoSenha"
-                          type="password"
-                          placeholder="123456"
-                          value={formData.confirmacaoSenha}
-                          onChange={(e) => handleInputChange('confirmacaoSenha', e.target.value)}
-                          required
-                          className="mt-2"
-                          maxLength={6}
-                        />
+                        <div className="relative mt-2">
+                          <Input
+                            id="confirmacaoSenha"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="123456"
+                            value={formData.confirmacaoSenha}
+                            onChange={(e) => handleInputChange('confirmacaoSenha', e.target.value)}
+                            required
+                            className="pr-10"
+                            maxLength={6}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       <div>
                         <Label htmlFor="dataNascimento" className="text-primary font-semibold">
-                          Data de Nascimento
+                          Data de Nascimento *
                         </Label>
                         <Input
                           id="dataNascimento"
@@ -562,6 +748,7 @@ const Associacao = () => {
                           value={formData.dataNascimento}
                           onChange={(e) => handleInputChange('dataNascimento', e.target.value)}
                           className="mt-2"
+                          required
                         />
                       </div>
 
@@ -607,7 +794,7 @@ const Associacao = () => {
                           type="text"
                           placeholder="Endereço"
                           value={formData.logradouro}
-                          disabled
+                          onChange={(e) => handleInputChange('logradouro', e.target.value)}
                           className="mt-2"
                         />
                       </div>
@@ -621,7 +808,7 @@ const Associacao = () => {
                           type="text"
                           placeholder="Bairro"
                           value={formData.bairro}
-                          disabled
+                          onChange={(e) => handleInputChange('bairro', e.target.value)}
                           className="mt-2"
                         />
                       </div>
@@ -635,7 +822,7 @@ const Associacao = () => {
                           type="text"
                           placeholder="Cidade"
                           value={formData.cidade}
-                          disabled
+                          onChange={(e) => handleInputChange('cidade', e.target.value)}
                           className="mt-2"
                         />
                       </div>
@@ -702,14 +889,19 @@ const Associacao = () => {
                         <Input
                           id="supervisor"
                           type="text"
-                          placeholder="000"
+                          placeholder="000000"
                           value={formData.supervisor}
                           onChange={(e) => handleInputChange('supervisor', e.target.value)}
                           onFocus={() => setIsSupervisorFocused(true)}
                           onBlur={() => setIsSupervisorFocused(false)}
                           className="mt-2"
-                          maxLength={3}
+                          maxLength={6}
                         />
+                        {supervisorName && (
+                          <div className="mt-1 text-sm text-green-600 font-medium">
+                            {supervisorName}
+                          </div>
+                        )}
                         {isSupervisorFocused && (
                           <div className="absolute z-10 bottom-full left-0 mb-2 bg-primary text-primary-foreground text-sm p-3 rounded-md shadow-lg animate-in fade-in zoom-in duration-200 w-full">
                             Se você foi convidado por um nomeado, por favor coloque o número dele.
@@ -873,7 +1065,7 @@ const Associacao = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl text-green-700">
               <CheckCircle className="w-8 h-8" />
-              Cadastro Realizado Comp Sucesso!
+              Cadastro Realizado Com Sucesso!
             </DialogTitle>
             <DialogDescription className="text-lg pt-2">
               Bem-vindo à família Frota Brasil! Aqui está sua carteirinha oficial.
@@ -881,7 +1073,7 @@ const Associacao = () => {
           </DialogHeader>
 
           <div className="flex flex-col items-center justify-center py-6 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
-            <div className="transform scale-75 sm:scale-90 md:scale-100 transition-transform origin-center">
+            <div className="transform scale-[0.6] sm:scale-75 md:scale-90 transition-transform origin-center membership-card-container">
               <MembershipCard
                 ref={cardRef}
                 name={submittedData?.nome || formData.nome}
@@ -890,6 +1082,8 @@ const Associacao = () => {
                 state={submittedData?.estado || formData.estado}
                 date={new Date().toLocaleDateString('pt-BR')}
                 photoUrl={photo}
+                memberNumber={assignedMemberNumber || nextMemberNumber || '000000'}
+                apelido={submittedData?.apelido || formData.apelido}
               />
             </div>
           </div>
@@ -902,6 +1096,20 @@ const Associacao = () => {
               <Download className="mr-2 h-4 w-4" />
               Baixar Carteirinha
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Modal Idade Minima */}
+      <Dialog open={showAgeRestrictionModal} onOpenChange={setShowAgeRestrictionModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Agradecemos seu interesse!</DialogTitle>
+            <DialogDescription>
+              Muito obrigado pelo interesse, porém só podemos cadastrar pessoas maiores de 16 anos.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowAgeRestrictionModal(false)}>Entendi</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

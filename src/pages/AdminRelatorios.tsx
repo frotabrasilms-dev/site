@@ -310,7 +310,10 @@ const AdminRelatorios = () => {
                                         </Button>
 
                                         {/* Coluna 3: Verde */}
-                                        <Button className="h-auto py-4 flex flex-col items-center gap-2 bg-green-500 hover:bg-green-600 text-white border-none">
+                                        <Button
+                                            className="h-auto py-4 flex flex-col items-center gap-2 bg-green-500 hover:bg-green-600 text-white border-none"
+                                            onClick={() => navigate('/admin/relatorios/estados')}
+                                        >
                                             <span className="font-semibold">Associados por Estado</span>
                                             <span className="text-xs opacity-90">Lista detalhada</span>
                                         </Button>

@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { adicionarParceiro, getParceiros } from '@/data/parceiros';
 import { Parceiro } from '@/types/parceiro';
 import { Link, useNavigate } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
 
 const AdminParceiros = () => {
     const { toast } = useToast();
@@ -19,8 +20,14 @@ const AdminParceiros = () => {
     const [isLoadingList, setIsLoadingList] = useState(true);
     const [formData, setFormData] = useState({
         nome: '',
+        cnpj: '',
+        contato_nome: '',
+        whatsapp: '',
+        exibir_whatsapp: false,
         imagem: '',
-        endereco: '',
+        cep: '',
+        numero: '',
+        endereco: '', // Stores the full formatted address
         site: '',
         observacao: ''
     });
@@ -29,7 +36,7 @@ const AdminParceiros = () => {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     // State for Editing
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingId, setEditingId] = useState<number | null>(null);
 
     const fetchParceiros = async () => {
         setIsLoadingList(true);
@@ -42,8 +49,102 @@ const AdminParceiros = () => {
         fetchParceiros();
     }, []);
 
-    const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+    const handleInputChange = (field: string, value: string | boolean) => {
+        let formattedValue = value;
+
+        if (field === 'cnpj' && typeof value === 'string') {
+            formattedValue = value
+                .replace(/\D/g, '')
+                .replace(/^(\d{2})(\d)/, '$1.$2')
+                .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+                .replace(/\.(\d{3})(\d)/, '.$1/$2')
+                .replace(/(\d{4})(\d)/, '$1-$2')
+                .slice(0, 18);
+        } else if (field === 'whatsapp' && typeof value === 'string') {
+            formattedValue = value
+                .replace(/\D/g, '')
+                .replace(/(\d{2})(\d)/, '($1) $2')
+                .replace(/(\d{5})(\d)/, '$1-$2')
+                .slice(0, 15);
+        } else if (field === 'cep' && typeof value === 'string') {
+            formattedValue = value
+                .replace(/\D/g, '')
+                .replace(/(\d{5})(\d)/, '$1-$2')
+                .slice(0, 9);
+        }
+
+        setFormData(prev => ({ ...prev, [field]: formattedValue }));
+    };
+
+    const handleCepBlur = async () => {
+        if (formData.cep.length < 9) return;
+
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${formData.cep.replace(/\D/g, '')}/json/`);
+            const data = await response.json();
+
+            if (!data.erro) {
+                // Update address string but keep it hidden/controlled by these fields
+                // We'll construct the full address string on submit or when fields change if we want to show it,
+                // but user asked for ONLY CEP and Number. 
+                // However, we need to store the full address for the frontend to show.
+                // Let's store components in state if we needed them, but for now we just need to build the string.
+                // Actually, I'll store the components to build the string on submit.
+                // Wait, if I only ask CEP and Number, the user can't edit street/city if ViaCEP is wrong. 
+                // But the instruction was specific: "Ask only CEP and Number". 
+                // I will trust the user wants simplicity. I'll fetch and store the full string.
+
+                const fullAddress = `${data.logradouro}, Nº ${formData.numero}, ${data.bairro}, ${data.localidade} - ${data.uf}, ${data.cep}`;
+                setFormData(prev => ({
+                    ...prev,
+                    endereco: fullAddress
+                }));
+            }
+        } catch (error) {
+            console.error("Erro ao buscar CEP:", error);
+        }
+    };
+
+    // Effect to update address when number changes
+    useEffect(() => {
+        if (formData.cep && formData.numero) {
+            // We need the other address parts to reconstruction if we don't save them.
+            // Since I didn't add columns for street/city, I have to rely on fetching or parsing.
+            // To avoid re-fetching, I should probably just fetch once. 
+            // Let's change strategy: Fetch on blur, and update the 'endereco' state. 
+            // If 'numero' changes, we need to inject it into the address string? 
+            // That's messy with a single string.
+            // Better strategy: Fetch address, save it in a temp variable or separate state if needed, 
+            // but `endereco` is the source of truth for DB.
+            // Given the constraint "Ask only CEP and Number", I will assume we generate the address string ON SUBMIT 
+            // based on the fetched data + number.
+            // BUT wait, `viacep` call is async. I can't do it comfortably in submit without waiting.
+            // I'll add `logradouro`, `bairro`, `cidade`, `uf` to state to hold values from ViaCEP.
+        }
+    }, [formData.numero]);
+
+    const [addressParts, setAddressParts] = useState({
+        logradouro: '',
+        bairro: '',
+        localidade: '',
+        uf: ''
+    });
+
+    const searchCep = async (cep: string) => {
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, '')}/json/`);
+            const data = await response.json();
+            if (!data.erro) {
+                setAddressParts({
+                    logradouro: data.logradouro,
+                    bairro: data.bairro,
+                    localidade: data.localidade,
+                    uf: data.uf
+                });
+            }
+        } catch (error) {
+            console.error("Erro ao buscar CEP:", error);
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +189,13 @@ const AdminParceiros = () => {
         setEditingId(parceiro.id);
         setFormData({
             nome: parceiro.nome,
-            imagem: parceiro.imagem,
+            cnpj: parceiro.cnpj || '',
+            contato_nome: parceiro.contato_nome || '',
+            whatsapp: parceiro.whatsapp || '',
+            exibir_whatsapp: parceiro.exibir_whatsapp || false,
+            imagem: parceiro.imagem || '',
+            cep: '',
+            numero: '',
             endereco: parceiro.endereco || '',
             site: parceiro.site || '',
             observacao: parceiro.observacao || ''
@@ -100,12 +207,25 @@ const AdminParceiros = () => {
 
     const handleCancelEdit = () => {
         setEditingId(null);
-        setFormData({ nome: '', imagem: '', endereco: '', site: '', observacao: '' });
+        setFormData({
+            nome: '',
+            cnpj: '',
+            contato_nome: '',
+            whatsapp: '',
+            exibir_whatsapp: false,
+            imagem: '',
+            cep: '',
+            numero: '',
+            endereco: '',
+            site: '',
+            observacao: ''
+        });
+        setAddressParts({ logradouro: '', bairro: '', localidade: '', uf: '' });
         setSelectedFile(null);
         setImagePreview(null);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: number) => {
         if (confirm('Tem certeza que deseja excluir este parceiro?')) {
             try {
                 const { error } = await supabase
@@ -140,7 +260,7 @@ const AdminParceiros = () => {
         if (!formData.nome) {
             toast({
                 title: "Erro",
-                description: "O campo 'Nome do Parceiro' é obrigatório.",
+                description: "O campo 'Nome da Empresa' é obrigatório.",
                 variant: "destructive"
             });
             setIsSubmitting(false);
@@ -163,14 +283,23 @@ const AdminParceiros = () => {
                 imageUrl = await uploadImage(selectedFile);
             }
 
+            let constructedAddress = formData.endereco;
+            if (addressParts.logradouro) {
+                constructedAddress = `${addressParts.logradouro}, ${formData.numero || 'S/N'}, ${addressParts.bairro}, ${addressParts.localidade} - ${addressParts.uf}, ${formData.cep}`;
+            }
+
             if (editingId) {
                 // Update existing
                 const { error } = await supabase
                     .from('parceiros')
                     .update({
                         nome: formData.nome,
+                        cnpj: formData.cnpj || null,
+                        contato_nome: formData.contato_nome || null,
+                        whatsapp: formData.whatsapp || null,
+                        exibir_whatsapp: formData.exibir_whatsapp,
                         imagem: imageUrl,
-                        endereco: formData.endereco || null,
+                        endereco: constructedAddress || null,
                         site: formData.site || null,
                         observacao: formData.observacao || null
                     })
@@ -187,8 +316,12 @@ const AdminParceiros = () => {
                 // Create new
                 await adicionarParceiro({
                     nome: formData.nome,
+                    cnpj: formData.cnpj || null,
+                    contato_nome: formData.contato_nome || null,
+                    whatsapp: formData.whatsapp || null,
+                    exibir_whatsapp: formData.exibir_whatsapp,
                     imagem: imageUrl,
-                    endereco: formData.endereco || null,
+                    endereco: constructedAddress || null,
                     site: formData.site || null,
                     observacao: formData.observacao || null
                 });
@@ -212,6 +345,73 @@ const AdminParceiros = () => {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleDownloadContract = () => {
+        if (!formData.nome || !formData.cnpj || !formData.contato_nome) {
+            toast({
+                title: "Dados incompletos",
+                description: "Preencha Nome da Empresa, CNPJ e Nome do Contato para gerar o contrato.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const doc = new jsPDF();
+
+        // Title
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text("CONTRATO DE PARCERIA PUBLICITÁRIA", 105, 20, { align: 'center' });
+
+        // Body text
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+
+        const text = `
+CONTRATANTE: FROTA BRASIL, inscrita no CNPJ sob o nº [CNPJ FROTA BRASIL], neste ato representada por DONNER DE SOUZA, doravante denominada CONTRATANTE.
+
+CONTRATADA: ${formData.nome}, inscrita no CNPJ sob o nº ${formData.cnpj}, neste ato representada por ${formData.contato_nome}, doravante denominada CONTRATADA.
+
+As partes acima identificadas têm, entre si, justo e contratado o presente Contrato de Parceria Publicitária, que se regerá pelas cláusulas seguintes:
+
+CLÁUSULA PRIMEIRA - DO OBJETO
+O presente contrato tem por objeto a divulgação da marca/empresa da CONTRATADA no website do FROTA BRASIL (www.frotabrasil.com.br).
+
+CLÁUSULA SEGUNDA - DA VIGÊNCIA
+O presente contrato terá validade de 06 (seis) meses, a contar da data de sua assinatura. Após este período, a renovação poderá ocorrer automaticamente mediante acordo entre as partes.
+
+CLÁUSULA TERCEIRA - DO VALOR E PAGAMENTO
+Pela prestação dos serviços de publicidade, a CONTRATADA pagará à CONTRATANTE o valor total de:
+( ) R$ 50,00 (cinquenta reais) mensais.
+( ) R$ 300,00 (trezentos reais) em parcela única.
+
+Parágrafo Único: O pagamento será realizado através de doação via PIX para a chave: 09.735.493/0001-38 (CNPJ Frota Brasil).
+
+CLÁUSULA QUARTA - DAS OBRIGAÇÕES DA CONTRATANTE
+A CONTRATANTE compromete-se a manter o banner/logo da CONTRATADA visível em seu website durante todo o período de vigência deste contrato.
+
+CLÁUSULA QUINTA - DO FORO
+Fica eleito o foro da comarca de Miranda/MS para dirimir quaisquer dúvidas oriundas deste contrato.
+
+E, por estarem justas e contratadas, as partes assinam o presente instrumento em 02 (duas) vias de igual teor.
+
+Miranda/MS, ${new Date().toLocaleDateString('pt-BR')}.
+        `;
+
+        const splitText = doc.splitTextToSize(text, 180);
+        doc.text(splitText, 15, 40);
+
+        // Signatures
+        doc.text("________________________________________________", 105, 220, { align: 'center' });
+        doc.text("FROTA BRASIL", 105, 225, { align: 'center' });
+        doc.text("DONNER DE SOUZA", 105, 230, { align: 'center' });
+
+        doc.text("________________________________________________", 105, 250, { align: 'center' });
+        doc.text(formData.nome.toUpperCase(), 105, 255, { align: 'center' });
+        doc.text(formData.contato_nome.toUpperCase(), 105, 260, { align: 'center' });
+
+        doc.save(`Contrato_FrotaBrasil_${formData.nome.replace(/\s+/g, '_')}.pdf`);
     };
 
     return (
@@ -248,26 +448,110 @@ const AdminParceiros = () => {
                                 <CardContent>
                                     <form onSubmit={handleSubmit} className="space-y-6">
                                         <div>
-                                            <Label htmlFor="nome">Nome do Parceiro *</Label>
+                                            <Label htmlFor="nome">Nome da Empresa *</Label>
                                             <Input
                                                 id="nome"
                                                 type="text"
                                                 value={formData.nome}
                                                 onChange={(e) => handleInputChange('nome', e.target.value)}
-                                                placeholder="Nome do parceiro"
+                                                placeholder="Nome da empresa"
                                                 required
                                             />
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="imagem">Imagem (Upload ou URL)</Label>
+                                            <Label htmlFor="cnpj">CNPJ</Label>
+                                            <Input
+                                                id="cnpj"
+                                                value={formData.cnpj}
+                                                onChange={(e) => handleInputChange('cnpj', e.target.value)}
+                                                placeholder="00.000.000/0000-00"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Label htmlFor="contato_nome">Contato (Nome)</Label>
+                                                <Input
+                                                    id="contato_nome"
+                                                    value={formData.contato_nome}
+                                                    onChange={(e) => handleInputChange('contato_nome', e.target.value)}
+                                                    placeholder="Nome do contato"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="whatsapp">WhatsApp</Label>
+                                                <Input
+                                                    id="whatsapp"
+                                                    value={formData.whatsapp}
+                                                    onChange={(e) => handleInputChange('whatsapp', e.target.value)}
+                                                    placeholder="(00) 00000-0000"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                id="exibir_whatsapp"
+                                                checked={formData.exibir_whatsapp}
+                                                onChange={(e) => handleInputChange('exibir_whatsapp', e.target.checked)}
+                                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                            />
+                                            <Label htmlFor="exibir_whatsapp" className="cursor-pointer font-normal">
+                                                Quer o ícone do WhatsApp com acesso direto a este número?
+                                            </Label>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Label htmlFor="cep">CEP</Label>
+                                                <Input
+                                                    id="cep"
+                                                    value={formData.cep}
+                                                    onChange={(e) => {
+                                                        handleInputChange('cep', e.target.value);
+                                                        if (e.target.value.replace(/\D/g, '').length === 8) {
+                                                            searchCep(e.target.value);
+                                                        }
+                                                    }}
+                                                    placeholder="00000-000"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="numero">Número do Imóvel</Label>
+                                                <Input
+                                                    id="numero"
+                                                    value={formData.numero}
+                                                    onChange={(e) => handleInputChange('numero', e.target.value)}
+                                                    placeholder="Número"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            {addressParts.logradouro && (
+                                                <p className="text-sm text-muted-foreground mt-2">
+                                                    {addressParts.logradouro}, {formData.numero || 'S/N'}, {addressParts.bairro}, {addressParts.localidade} - {addressParts.uf}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <Label htmlFor="imagem">Imagem</Label>
                                             <div className="space-y-4">
                                                 <Label htmlFor="file-upload" className="cursor-pointer block">
-                                                    <div className="flex items-center space-x-2 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg hover:border-primary/50 transition-colors">
-                                                        <Upload className="h-5 w-5 text-muted-foreground" />
-                                                        <span className="text-sm text-muted-foreground">
-                                                            {selectedFile ? selectedFile.name : 'Clique para selecionar nova imagem'}
-                                                        </span>
+                                                    <div className="flex flex-col items-center space-y-2 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg hover:border-primary/50 transition-colors">
+                                                        <div className="flex items-center space-x-2">
+                                                            <Upload className="h-5 w-5 text-muted-foreground" />
+                                                            <span className="text-sm font-medium text-foreground">
+                                                                {selectedFile ? selectedFile.name : 'Carregar uma logo ou uma imagem'}
+                                                            </span>
+                                                        </div>
+                                                        {!selectedFile && (
+                                                            <p className="text-xs text-muted-foreground text-center">
+                                                                Como sugestão, caso não tenha logo, tire uma foto da frente do comércio e carregue esta imagem
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </Label>
                                                 <Input
@@ -288,30 +572,11 @@ const AdminParceiros = () => {
                                                         <p className="text-xs text-muted-foreground">Pré-visualização</p>
                                                     </div>
                                                 )}
-
-                                                <div className="text-sm text-muted-foreground">Ou URL:</div>
-                                                <Input
-                                                    id="imagem"
-                                                    type="url"
-                                                    value={formData.imagem || ''}
-                                                    onChange={(e) => handleInputChange('imagem', e.target.value)}
-                                                    placeholder="https://..."
-                                                />
                                             </div>
                                         </div>
 
                                         <div>
-                                            <Label htmlFor="endereco">Endereço</Label>
-                                            <Textarea
-                                                id="endereco"
-                                                value={formData.endereco}
-                                                onChange={(e) => handleInputChange('endereco', e.target.value)}
-                                                placeholder="Endereço completo"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="site">Site</Label>
+                                            <Label htmlFor="site">Site/Social</Label>
                                             <Input
                                                 id="site"
                                                 type="url"
@@ -338,6 +603,15 @@ const AdminParceiros = () => {
                                                 {editingId ? 'Salvar Alterações' : 'Adicionar Parceiro'}
                                             </Button>
 
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                                                onClick={handleDownloadContract}
+                                            >
+                                                Baixar Contrato
+                                            </Button>
+
                                             {editingId && (
                                                 <Button type="button" variant="outline" onClick={handleCancelEdit}>
                                                     Cancelar
@@ -348,12 +622,12 @@ const AdminParceiros = () => {
                                 </CardContent>
                             </Card>
 
-                            {/* Lista */}
+                            {/* Lista de Parceiros */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center space-x-2">
                                         <Users className="h-5 w-5" />
-                                        <span>Parceiros Cadastrados ({parceirosList.length})</span>
+                                        <span>Parceiros Cadastrados</span>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>

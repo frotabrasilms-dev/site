@@ -4,6 +4,10 @@ export interface Parceiro {
   nome: string;
   imagem: string | null;
   endereco: string | null;
-  site: string | null;
-  observacao: string | null;
+  site?: string;
+  observacao?: string;
+  cnpj?: string;
+  contato_nome?: string;
+  whatsapp?: string;
+  exibir_whatsapp?: boolean;
 }

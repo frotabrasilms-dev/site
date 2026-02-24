@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, ExternalLink, Loader2 } from 'lucide-react';
+import { MapPin, ExternalLink, Loader2, MessageCircle } from 'lucide-react';
 import { getParceiros } from '@/data/parceiros';
 import { Parceiro } from '@/types/parceiro';
 
@@ -92,6 +92,20 @@ const Parceiros = () => {
                             </button>
                           </div>
                         )}
+
+                        {parceiro.exibir_whatsapp && parceiro.whatsapp && (
+                          <div className="mt-4">
+                            <a
+                              href={`https://wa.me/55${parceiro.whatsapp.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2"
+                            >
+                              <MessageCircle className="h-5 w-5" />
+                              Falar no WhatsApp
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -122,8 +136,8 @@ const Parceiros = () => {
             </div>
           </div>
         </section>
-      </div>
-    </Layout>
+      </div >
+    </Layout >
   );
 };
 

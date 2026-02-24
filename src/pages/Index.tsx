@@ -2,7 +2,7 @@ import Layout from '@/components/Layout';
 import HeroSection from '@/components/HeroSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -19,7 +19,14 @@ import {
   Building,
   X,
   Instagram,
-  Loader2
+  Loader2,
+  Calculator,
+  BookOpen,
+  School,
+  Pill,
+  ShoppingCart,
+  Package,
+  MessageCircle
 } from 'lucide-react';
 import {
   Carousel,
@@ -29,13 +36,30 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
+import StateFlagsCarousel, { brazilianStates } from '@/components/StateFlagsCarousel';
 
 const Index = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [isCamposModalOpen, setIsCamposModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', company: '', phone: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleBenefitClick = (whatsappNumber: string) => {
+    const userCpf = localStorage.getItem('user_cpf');
+    if (!userCpf) {
+      toast({
+        title: "Acesso Restrito",
+        description: "Faça login para acessar este benefício.",
+        variant: "destructive",
+      });
+      navigate('/login');
+    } else {
+      window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +125,7 @@ const Index = () => {
             Em Movimento Nacional
           </h2>
           <div className="flex justify-center mb-8">
-            <a href="https://www.youtube.com/watch?v=WwRHeVqGizM" target="_blank" rel="noopener noreferrer" className="block w-full max-w-2xl transform hover:scale-105 transition-transform duration-300">
+            <a href="https://www.youtube.com/shorts/1CgQbxnVyDM" target="_blank" rel="noopener noreferrer" className="block w-full max-w-2xl transform hover:scale-105 transition-transform duration-300">
               <img
                 src="/vovo-caminhoneiro-new.png"
                 alt="Vovô Caminhoneiro - Delegado Nacional"
@@ -165,6 +189,13 @@ const Index = () => {
                 className="w-full max-w-xs md:w-48 h-auto rounded-md shadow-md"
               />
             </a>
+            <a href="https://www.instagram.com/grupoeadtran/" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full md:w-auto flex justify-center">
+              <img
+                src="/eadetran.jpeg"
+                alt="EADTRAN Cursos de Trânsito"
+                className="w-full max-w-xs md:w-48 h-auto rounded-md shadow-md"
+              />
+            </a>
             <a href="https://bdmdigital.com.br/home" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full md:w-auto flex justify-center">
               <img
                 src="/BD4.png"
@@ -172,43 +203,49 @@ const Index = () => {
                 className="w-full max-w-xs md:w-48 h-auto rounded-md shadow-md"
               />
             </a>
+            <a href="https://wa.me/5565996380209" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full md:w-auto flex justify-center">
+              <img
+                src="/CASA.png"
+                alt="Casa Grande Assistência e Locação de Máquinas"
+                className="w-full max-w-xs md:w-48 h-auto rounded-md shadow-md"
+              />
+            </a>
 
             <div className="flex flex-col items-center gap-2 w-full md:w-auto">
-              <a href="https://wa.me/5521993151536" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full flex justify-center">
+              <a href="https://www.instagram.com/eusoululu.consorcio?igsh=aWRtOXh5cG12b2Yw" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full flex justify-center">
                 <img
                   src="/ademicon-logo.jpg"
                   alt="Ademicon"
                   className="w-full max-w-xs md:w-48 h-auto rounded-md shadow-md"
                 />
               </a>
-              <a
-                href="https://www.instagram.com/eusoululu.consorcio?igsh=aWRtOXh5cG12b2Yw"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-pink-600 hover:bg-pink-700 text-white p-2 rounded-full shadow-md hover:scale-110 transition-all flex items-center justify-center"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
             </div>
             <div className="flex flex-col items-center gap-2 w-full md:w-auto">
-              <a href="https://wa.me/5581995285134" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full flex justify-center">
+              <a href="https://www.instagram.com/heitor_caldas?igsh=MXVuZm1xOTV1OXRnZg==" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full flex justify-center">
                 <img
                   src="/nortia-logo.jpg"
                   alt="Nortia Seguro e Proteção Ltda"
                   className="w-full max-w-xs md:w-48 h-auto rounded-md shadow-md"
                 />
               </a>
-              <a
-                href="https://www.instagram.com/heitor_caldas?igsh=MXVuZm1xOTV1OXRnZg=="
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-pink-600 hover:bg-pink-700 text-white p-2 rounded-full shadow-md hover:scale-110 transition-all flex items-center justify-center"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
             </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-4 mt-8 md:mt-8">
+            <a href="https://www.instagram.com/lopes.andersonluiz?igsh=MXg5cTYxcThiMzAxNQ%3D%3D" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full md:w-auto flex justify-center">
+              <img
+                src="/SAO MIGUEL.jpeg"
+                alt="São Miguel Arcanjo Transportes"
+                className="w-full max-w-xs md:w-48 h-auto rounded-md shadow-md"
+              />
+            </a>
+            <a href="https://camposecaldas.adv.br/" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform w-full md:w-auto flex justify-center">
+              <img
+                src="/campos.png"
+                alt="Campos e Caldas Advocacia"
+                className="w-full max-w-xs md:w-48 h-auto rounded-md shadow-md"
+              />
+            </a>
           </div>
 
           <div className="mt-16 flex flex-col items-center">
@@ -223,32 +260,82 @@ const Index = () => {
               Seja um apoiador
             </button>
 
-            <div className="mt-12 flex flex-col items-center">
-              <img
-                src="/bandeira-ms.jpg"
-                alt="Bandeira do Mato Grosso do Sul"
-                className="w-full max-w-md rounded-lg shadow-md mb-4"
-              />
-              <h3 className="text-2xl font-bold text-gray-700 font-primary uppercase">
+            <div className="mt-12 flex flex-col items-center w-full">
+              <h3 className="text-2xl font-bold text-gray-700 font-primary uppercase mb-8">
                 Apoiadores Estaduais
               </h3>
-              <div className="flex flex-col items-center gap-8 mt-6 text-lg font-medium text-gray-600 w-full">
-                <div className="flex flex-col items-center w-full">
-                  <span className="px-6 py-2 bg-white rounded-full shadow-sm border border-gray-100 mb-4 text-xl font-bold">Campo Grande</span>
-                  <a href="https://www.instagram.com/petrasolucoesemsaude/" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform">
-                    <img src="/petra-logo.jpg" alt="Petra Soluções" className="h-64 w-auto rounded-lg shadow-sm" />
-                  </a>
-                </div>
-                <div className="flex flex-col items-center w-full">
-                  <span className="px-6 py-2 bg-white rounded-full shadow-sm border border-gray-100 mb-4 text-xl font-bold">Dourados</span>
-                  <a href="https://engecomms.com.br/" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform">
-                    <img src="/engecom-ms.jpg" alt="Engecom" className="h-64 w-auto rounded-lg shadow-sm" />
-                  </a>
-                </div>
-                <span className="px-6 py-2 bg-white rounded-full shadow-sm border border-gray-100 text-xl font-bold w-fit">Três Lagoas</span>
-                <span className="px-6 py-2 bg-white rounded-full shadow-sm border border-gray-100 text-xl font-bold w-fit">Corumbá</span>
-                <span className="px-6 py-2 bg-white rounded-full shadow-sm border border-gray-100 text-xl font-bold w-fit">Ponta Porã</span>
+
+              <div className="w-full">
+                <StateFlagsCarousel />
               </div>
+
+
+            </div>
+
+            <div className="w-full mt-16 max-w-6xl animate-in slide-in-from-bottom duration-700 delay-300">
+              <h3 className="text-2xl font-bold text-gray-700 font-primary uppercase text-center mb-8">
+                Presente em Todo o Brasil
+              </h3>
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                plugins={[
+                  Autoplay({
+                    delay: 2000,
+                  }),
+                ]}
+                className="w-full"
+              >
+                <CarouselContent>
+                  {[
+                    { name: 'Acre', flag: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Bandeira_do_Acre.svg' },
+                    { name: 'Alagoas', flag: 'https://upload.wikimedia.org/wikipedia/commons/8/88/Bandeira_de_Alagoas.svg' },
+                    { name: 'Amapá', flag: 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Bandeira_do_Amap%C3%A1.svg' },
+                    { name: 'Amazonas', flag: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Bandeira_do_Amazonas.svg' },
+                    { name: 'Bahia', flag: 'https://upload.wikimedia.org/wikipedia/commons/2/28/Bandeira_da_Bahia.svg' },
+                    { name: 'Ceará', flag: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Bandeira_do_Cear%C3%A1.svg' },
+                    { name: 'Distrito Federal', flag: 'https://upload.wikimedia.org/wikipedia/commons/3/3c/Bandeira_do_Distrito_Federal_%28Brasil%29.svg' },
+                    { name: 'Espírito Santo', flag: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Bandeira_do_Esp%C3%ADrito_Santo.svg' },
+                    { name: 'Goiás', flag: 'https://upload.wikimedia.org/wikipedia/commons/b/be/Flag_of_Goi%C3%A1s.svg' },
+                    { name: 'Maranhão', flag: 'https://upload.wikimedia.org/wikipedia/commons/4/45/Bandeira_do_Maranh%C3%A3o.svg' },
+                    { name: 'Mato Grosso', flag: 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Bandeira_de_Mato_Grosso.svg' },
+                    { name: 'Mato Grosso do Sul', flag: 'https://upload.wikimedia.org/wikipedia/commons/6/64/Bandeira_de_Mato_Grosso_do_Sul.svg' },
+                    { name: 'Minas Gerais', flag: 'https://upload.wikimedia.org/wikipedia/commons/f/f4/Bandeira_de_Minas_Gerais.svg' },
+                    { name: 'Pará', flag: 'https://upload.wikimedia.org/wikipedia/commons/0/02/Bandeira_do_Par%C3%A1.svg' },
+                    { name: 'Paraíba', flag: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/Bandeira_da_Para%C3%ADba.svg' },
+                    { name: 'Paraná', flag: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Bandeira_do_Paran%C3%A1.svg' },
+                    { name: 'Pernambuco', flag: 'https://upload.wikimedia.org/wikipedia/commons/5/59/Bandeira_de_Pernambuco.svg' },
+                    { name: 'Piauí', flag: 'https://upload.wikimedia.org/wikipedia/commons/3/33/Bandeira_do_Piau%C3%AD.svg' },
+                    { name: 'Rio de Janeiro', flag: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Bandeira_do_estado_do_Rio_de_Janeiro.svg' },
+                    { name: 'Rio Grande do Norte', flag: 'https://upload.wikimedia.org/wikipedia/commons/3/30/Bandeira_do_Rio_Grande_do_Norte.svg' },
+                    { name: 'Rio Grande do Sul', flag: 'https://upload.wikimedia.org/wikipedia/commons/6/63/Bandeira_do_Rio_Grande_do_Sul.svg' },
+                    { name: 'Rondônia', flag: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Bandeira_de_Rond%C3%B4nia.svg' },
+                    { name: 'Roraima', flag: 'https://upload.wikimedia.org/wikipedia/commons/9/98/Bandeira_de_Roraima.svg' },
+                    { name: 'Santa Catarina', flag: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Bandeira_de_Santa_Catarina.svg' },
+                    { name: 'São Paulo', flag: 'https://upload.wikimedia.org/wikipedia/commons/2/2b/Bandeira_do_estado_de_S%C3%A3o_Paulo.svg' },
+                    { name: 'Sergipe', flag: 'https://upload.wikimedia.org/wikipedia/commons/b/be/Bandeira_de_Sergipe.svg' },
+                    { name: 'Tocantins', flag: 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Bandeira_do_Tocantins.svg' }
+                  ].map((state, index) => (
+                    <CarouselItem key={index} className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 pl-4">
+                      <div className="p-1 h-full">
+                        <div className="flex flex-col items-center justify-center p-4 h-32 bg-white rounded-lg hover:shadow-md transition-shadow">
+                          <div className="h-16 w-full flex items-center justify-center mb-2">
+                            <img
+                              src={state.flag}
+                              alt={`Bandeira de ${state.name}`}
+                              className="max-h-full max-w-full object-contain shadow-sm"
+                              loading="lazy"
+                            />
+                          </div>
+                          <span className="text-[10px] sm:text-xs font-medium text-center text-muted-foreground leading-tight">{state.name}</span>
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
             </div>
           </div>
         </div>
@@ -258,20 +345,244 @@ const Index = () => {
 
 
 
-      {/* Projeto EFB */}
-      <section className="py-20 bg-muted/30">
-        <div className="container-custom text-center">
-          <img
-            src="/projeto-efb-updated.png"
-            alt="O que é o Projeto EFB"
-            className="w-full max-w-4xl mx-auto rounded-lg shadow-xl mb-8"
-          />
+      {/* Benefícios Especiais */}
+      <section className="py-16 bg-muted/30">
+        <div className="container-custom">
+
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12 text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 font-primary uppercase leading-tight">
+              Contratações diretas com benefícios exclusivos do associado EFB<span className="text-lg font-normal ml-2">empresários frota Brasil</span>
+            </h2>
+            <img
+              src="/bandeira.jpg"
+              alt="Bandeira do Brasil"
+              className="w-12 h-auto rounded shadow-sm"
+            />
+          </div>
+
+          <div className="max-w-4xl mx-auto px-4">
+            <Carousel
+              opts={{
+                align: "center",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {/* EADTRAN - Cursos de Trânsito */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('5541999838006')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="mb-6 h-32 flex items-center justify-center">
+                      <img
+                        src="/eadetran.jpeg"
+                        alt="EADTRAN Cursos de Trânsito"
+                        className="h-full w-auto object-contain"
+                      />
+                    </div>
+                    <h3 className="text-xl font-bold text-primary mb-3 uppercase">
+                      Cursos de Trânsito
+                    </h3>
+                    <p className="text-gray-600">
+                      Capacitação especializada EAD com condições exclusivas para associados.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+
+
+
+
+                {/* Seguros de Vida - Nortia */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('558195285134')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="mb-6 h-32 flex items-center justify-center">
+                      <img
+                        src="/nortia-logo.jpg"
+                        alt="Nortia Seguros"
+                        className="h-full w-auto object-contain"
+                      />
+                    </div>
+                    <h3 className="text-xl font-bold text-blue-700 mb-3 uppercase">
+                      Seguros de Vida
+                    </h3>
+                    <p className="text-gray-600">
+                      Proteção completa para você e sua família com condições exclusivas.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Consórcios e Carta de Crédito - Ademicon */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('5521993151536')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="mb-6 h-32 flex items-center justify-center">
+                      <img
+                        src="/ademicon-logo.jpg"
+                        alt="Ademicon"
+                        className="h-full w-auto object-contain"
+                      />
+                    </div>
+                    <h3 className="text-xl font-bold text-red-700 mb-3 uppercase">
+                      Consórcios e Carta de Crédito
+                    </h3>
+                    <p className="text-gray-600">
+                      Planeje suas conquistas com as melhores taxas do mercado.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Campos e Caldas - Orientação Advocatícia */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => setIsCamposModalOpen(true)} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="mb-6 h-32 flex items-center justify-center">
+                      <img
+                        src="/campos.png"
+                        alt="Campos e Caldas Advocacia"
+                        className="h-full w-auto object-contain rounded-lg"
+                      />
+                    </div>
+                    <h3 className="text-xl font-bold text-primary mb-3 uppercase">
+                      Orientação Jurídica
+                    </h3>
+                    <p className="text-gray-600">
+                      Contratação anual com condições especiais para associados.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Cursos */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('556733333333')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="bg-orange-100 p-4 rounded-full mb-6">
+                      <GraduationCap className="h-12 w-12 text-orange-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-orange-700 mb-3 uppercase">
+                      Cursos
+                    </h3>
+                    <p className="text-gray-600">
+                      Capacitação profissional e treinamentos para impulsionar sua carreira.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Plano de Saúde */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('556733333333')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="bg-green-100 p-4 rounded-full mb-6">
+                      <Stethoscope className="h-12 w-12 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-green-700 mb-3 uppercase">
+                      Plano de Saúde
+                    </h3>
+                    <p className="text-gray-600">
+                      Cuidado integral com a sua saúde e bem-estar.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Orientação Contábil */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('556733333333')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="bg-amber-100 p-4 rounded-full mb-6">
+                      <Calculator className="h-12 w-12 text-amber-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-amber-700 mb-3 uppercase">
+                      Orientação Contábil
+                    </h3>
+                    <p className="text-gray-600">
+                      Suporte especializado para questões fiscais e contábeis.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Cursos Profissionalizantes */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('556733333333')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="bg-orange-100 p-4 rounded-full mb-6">
+                      <BookOpen className="h-12 w-12 text-orange-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-orange-700 mb-3 uppercase">
+                      Cursos Profissionalizantes
+                    </h3>
+                    <p className="text-gray-600">
+                      Capacitação profissional para impulsionar sua carreira.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Faculdade */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('556733333333')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="bg-indigo-100 p-4 rounded-full mb-6">
+                      <School className="h-12 w-12 text-indigo-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-indigo-700 mb-3 uppercase">
+                      Faculdade
+                    </h3>
+                    <p className="text-gray-600">
+                      Parcerias educacionais para graduação e pós-graduação.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Farmácia */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('556733333333')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="bg-red-100 p-4 rounded-full mb-6">
+                      <Pill className="h-12 w-12 text-red-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-red-700 mb-3 uppercase">
+                      Farmácia
+                    </h3>
+                    <p className="text-gray-600">
+                      Descontos em medicamentos e produtos de saúde.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Supermercado */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('556733333333')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="bg-green-100 p-4 rounded-full mb-6">
+                      <ShoppingCart className="h-12 w-12 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-green-700 mb-3 uppercase">
+                      Supermercado
+                    </h3>
+                    <p className="text-gray-600">
+                      Benefícios exclusivos para compras no dia a dia.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+                {/* Atacado */}
+                <CarouselItem className="basis-full">
+                  <div onClick={() => handleBenefitClick('556733333333')} className="cursor-pointer h-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center hover:transform hover:-translate-y-1 transition-all duration-300 mx-auto max-w-md">
+                    <div className="bg-cyan-100 p-4 rounded-full mb-6">
+                      <Package className="h-12 w-12 text-cyan-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-cyan-700 mb-3 uppercase">
+                      Atacado
+                    </h3>
+                    <p className="text-gray-600">
+                      Condições especiais para compras em grande quantidade.
+                    </p>
+                  </div>
+                </CarouselItem>
+
+              </CarouselContent>
+              <CarouselPrevious className="-left-4 md:-left-12" />
+              <CarouselNext className="-right-4 md:-right-12" />
+            </Carousel>
+          </div>
         </div>
       </section>
 
-      {/* Carousel Section */}
+      {/* Carousel Section - Organização e Projetos */}
       <section className="py-10 bg-white">
         <div className="container-custom">
+          <h2 className="text-3xl font-bold text-center text-primary uppercase mb-8">
+            Organização e Projetos
+          </h2>
           <Carousel
             plugins={[
               Autoplay({
@@ -282,6 +593,7 @@ const Index = () => {
           >
             <CarouselContent>
               {[
+                "/projeto-efb-updated.png",
                 "/carousel-mapa-brasil.png",
                 "/carousel-mapa-brasil-centro.jpg",
                 "/carousel-mapa-ms.jpg",
@@ -420,6 +732,53 @@ const Index = () => {
         </div>
       )
       }
+
+      {/* Modal Campos e Caldas */}
+      {isCamposModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md relative animate-in fade-in zoom-in duration-200">
+            <button
+              onClick={() => setIsCamposModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            <div className="p-6 text-center">
+              <h3 className="text-2xl font-bold mb-4 text-primary">Contratação de Orientação Jurídica</h3>
+              <p className="text-xl font-bold text-primary mb-2">Anual R$ 260,00</p>
+
+              <div className="bg-gray-100 p-4 rounded-lg mb-6 mt-6 break-all border-2 border-dashed border-gray-300">
+                <p className="text-sm text-gray-500 mb-2 font-semibold uppercase tracking-wider">Chave PIX</p>
+                <p className="text-lg font-bold text-primary select-all">09735493438</p>
+              </div>
+
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText("09735493438");
+                  toast({
+                    title: "Chave PIX copiada!",
+                    description: "A chave PIX foi copiada para sua área de transferência.",
+                  });
+                }}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-md transition-colors shadow-md transform duration-150 mb-3"
+              >
+                Copiar Chave PIX
+              </Button>
+
+              <a
+                href="https://wa.me/5567984678018"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-md transition-colors shadow-md transform duration-150 flex items-center justify-center"
+              >
+                <MessageCircle className="mr-2 h-5 w-5" />
+                Enviar Comprovante
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout >
   );
 };

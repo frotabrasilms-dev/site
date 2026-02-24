@@ -24,7 +24,12 @@ import {
   Users
 } from 'lucide-react';
 
+import { useEffect } from 'react';
+
 const Beneficios = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const benefits = [
     {
       id: 'banco',
@@ -306,12 +311,9 @@ const Beneficios = () => {
       {/* CTA Final */}
       <section className="py-20 hero-gradient text-white">
         <div className="container-custom text-center">
-          <h2 className="text-4xl font-bold mb-6 text-shadow">
-            Todos Esses Benefícios
+          <h2 className="text-3xl md:text-4xl font-bold mb-10 text-shadow max-w-4xl mx-auto leading-tight">
+            Alguns benefícios são gratuitos mas todos têm algum desconto para associado do Frota Brasil
           </h2>
-          <div className="mb-8">
-            <div className="text-6xl font-bold text-accent mb-2">GRÁTIS</div>
-          </div>
           <Link to="/associacao">
             <Button className="btn-accent px-8 py-4 text-lg font-bold rounded-xl hover:scale-105 transition-transform">
               Quero Me Associar Agora

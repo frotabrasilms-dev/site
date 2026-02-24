@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { LogIn, User } from 'lucide-react';
+import { LogIn, User, Loader2 } from 'lucide-react';
 
 const Login = () => {
   const { toast } = useToast();
@@ -85,7 +85,7 @@ const Login = () => {
       localStorage.setItem('user_cpf', data.cpf);
 
       // Aqui você pode redirecionar para uma página de dashboard ou área do associado
-      navigate('/');
+      navigate('/ferramentas');
     }
   };
 
@@ -135,10 +135,21 @@ const Login = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <LogIn className="h-4 w-4 mr-2 animate-spin" />}
-                {!isLoading && <LogIn className="h-4 w-4 mr-2" />}
+              <Button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-md transition-colors"
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <LogIn className="h-4 w-4 mr-2" />}
                 Entrar
+              </Button>
+
+              <Button
+                type="button"
+                className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-md transition-colors"
+                onClick={() => navigate('/associacao')}
+              >
+                Não tenho conta
               </Button>
             </form>
           </CardContent>

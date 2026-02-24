@@ -11,7 +11,12 @@ import { supabase } from '@/integrations/supabase/client';
 
 type ViewMode = 'landing' | 'login_admin' | 'verify_supervisor' | 'dashboard';
 
+import { useEffect } from 'react';
+
 const Admin = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const { toast } = useToast();
   const navigate = useNavigate();
 
