@@ -267,15 +267,20 @@ const AssistenteJuridico = () => {
 
                                     setIsLoading(true);
 
-                                    try {
-                                        // Convert file to Base64
-                                        const reader = new FileReader();
-                                        reader.readAsDataURL(file);
-                                        reader.onload = async () => {
-                                            const base64 = (reader.result as string).split(',')[1];
+                                    const processFile = async () => {
+                                        try {
+                                            // Convert file to Base64 using a Promise for cleaner async flow
+                                            const base64 = await new Promise<string>((resolve, reject) => {
+                                                const reader = new FileReader();
+                                                reader.onload = () => resolve((reader.result as string).split(',')[1]);
+                                                reader.onerror = (err) => reject(err);
+                                                reader.readAsDataURL(file);
+                                            });
+
+                                            console.log('📄 Enviando arquivo para análise...', file.name);
 
                                             // Call Supabase Edge Function
-                                            const { data, error } = await supabase.functions.invoke('analisar-multa', {
+                                            const { data, error: invokeError } = await supabase.functions.invoke('analisar-multa', {
                                                 body: {
                                                     fileBase64: base64,
                                                     contentType: file.type,
@@ -283,11 +288,10 @@ const AssistenteJuridico = () => {
                                                 }
                                             });
 
-                                            setIsLoading(false);
-
-                                            if (error) throw error;
+                                            if (invokeError) throw invokeError;
 
                                             if (data) {
+                                                console.log('✅ Análise concluída:', data);
                                                 setInfractionData({
                                                     auto: data.auto || '',
                                                     orgao: data.orgao || '',
@@ -307,18 +311,19 @@ const AssistenteJuridico = () => {
                                                     description: "Os dados da multa foram extraídos com sucesso pela IA."
                                                 });
                                             }
-                                        };
-                                        reader.onerror = (error) => {
-                                            throw error;
-                                        };
-                                    } catch (error: any) {
-                                        setIsLoading(false);
-                                        toast({
-                                            title: "Erro na Análise",
-                                            description: error.message || "Não foi possível processar o arquivo.",
-                                            variant: "destructive"
-                                        });
-                                    }
+                                        } catch (error: any) {
+                                            console.error('❌ Erro na análise:', error);
+                                            toast({
+                                                title: "Erro na Análise",
+                                                description: error.message || "Não foi possível processar o arquivo. Verifique se a chave de API está configurada.",
+                                                variant: "destructive"
+                                            });
+                                        } finally {
+                                            setIsLoading(false);
+                                        }
+                                    };
+
+                                    processFile();
                                 }}
                             />
                             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
