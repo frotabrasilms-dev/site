@@ -884,7 +884,7 @@ const Associacao = () => {
 
                       <div className="relative">
                         <Label htmlFor="supervisor" className="text-primary font-semibold">
-                          Indicador/Subdelegado
+                          Indicado pelo associado número:
                         </Label>
                         <Input
                           id="supervisor"
@@ -904,7 +904,7 @@ const Associacao = () => {
                         )}
                         {isSupervisorFocused && (
                           <div className="absolute z-10 bottom-full left-0 mb-2 bg-primary text-primary-foreground text-sm p-3 rounded-md shadow-lg animate-in fade-in zoom-in duration-200 w-full">
-                            Se você foi convidado por um nomeado, por favor coloque o número dele.
+                            Se você foi convidado por um associado ou nomeado, por favor coloque o número dele.
                             <div className="absolute -bottom-2 left-4 w-4 h-4 bg-primary transform rotate-45"></div>
                           </div>
                         )}
